@@ -142,6 +142,9 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;paddin
 .blocked{position:fixed;inset:0;background:var(--bg);color:#fff;display:none;place-items:center;text-align:center;padding:30px;z-index:300}
 
 /* обучение */
+.setup-top{position:sticky;top:-20px;z-index:3;margin:-20px -16px 8px;padding:14px 16px 10px;background:var(--paper);border-bottom:3px dashed #e0d8c6;text-align:center}
+.setup-left{font-family:var(--dp);font-size:30px;font-weight:800;color:#4e7d17;line-height:1.15}
+.setup-left.warn{color:#c98a00}.setup-left.neg{color:var(--red)}
 .coach{position:fixed;inset:0;z-index:110;pointer-events:none;display:none}
 .coach.show{display:block}
 .spot{position:fixed;border-radius:20px;box-shadow:0 0 0 9999px rgba(15,17,38,.78);transition:all .3s cubic-bezier(.2,.9,.3,1);outline:3px solid var(--yel);outline-offset:3px}
@@ -184,6 +187,8 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;paddin
       <div class="title">Команда</div><p class="lead" id="team-lead"></p>
       <div id="workers"></div>
       <div id="cands"></div>
+      <div class="title">Твой ноутбук</div><p class="lead">От него зависит, как быстро ты работаешь сам</p>
+      <div id="laptops"></div>
       <div class="title">Офис</div><p class="lead">Больше мест, больше людей. Аренда списывается раз в месяц</p>
       <div id="offices"></div>
       <div class="title">Нейросети</div><p class="lead">Подписки усиливают всю команду. Цена за человека в месяц</p>
@@ -274,11 +279,11 @@ const RESEARCH = [
   {id:"report",ico:"🔍",name:"Аналитика рынка",rp:15,desc:"Перед стартом видно, подходит ли ниша к типу"},
   {id:"beta",  ico:"🧪",name:"Автотесты",rp:20,desc:"Багов на 30% меньше"},
   {id:"mkt",   ico:"📣",name:"Маркетинг",rp:25,desc:"Продажи на 20% выше"},
-  {id:"size_m",ico:"🐥",name:"Средние проекты",rp:30,desc:"Дороже, дольше, но продажи ×3"},
+  {id:"size_m",ico:"🐥",name:"Средние проекты",rp:30,desc:"Дороже и дольше, зато продажи ×2,5"},
   {id:"type_miniapp",ico:"📱",name:"Мини-приложения",rp:25,desc:"Новый тип продукта"},
   {id:"type_crm",ico:"📊",name:"CRM-системы",rp:40,desc:"Новый тип продукта"},
   {id:"type_ai",ico:"🦾",name:"AI-ассистенты",rp:60,desc:"Новый тип продукта"},
-  {id:"size_l",ico:"🦅",name:"Большие проекты",rp:90,desc:"Продажи ×10, нужна команда от 4 человек"},
+  {id:"size_l",ico:"🦅",name:"Большие проекты",rp:90,desc:"Продажи ×6, нужна команда от 4 человек"},
   {id:"type_app",ico:"📲",name:"Мобильные приложения",rp:90,desc:"Новый тип продукта"},
   {id:"ownai", ico:"🧬",name:"Своя нейросеть",rp:140,desc:"Вся команда +1 ко всем навыкам"},
 ];
@@ -294,7 +299,7 @@ const OFFICES = [
 ];
 const LIFE = 10000;
 // стартовое обучение: от тарифа зависит, с чем начинаешь
-const START_MONEY = 20000;
+const START_MONEY = 50000;
 const TIERS = {
   start: {name:"Старт",ico:"🌱",price:2990,bar:42,d:1,t:3,r:1,design:false,flow:false,pay:1,every:0,avito:false,
     pros:["Сайты и Telegram-боты"],cons:["Дизайн не умеешь: карточки и логотипы не берёшь","Заказы не приходят, ищешь сам"]},
@@ -374,7 +379,6 @@ const SAY_WORK = ["Промт: «сделай красиво»","Нейросе�
 const SAY_IDLE = ["Скучно…","Может, новый проект?","Листаю рилсы про вайб-кодинг","Я бы сейчас что-нибудь задеплоил","Пора на дело, шеф"];
 const NAMES = ["Тимур","Алина","Санжар","Карина","Артём","Мадина","Ерлан","Вика","Данияр","Полина","Руслан","Дина","Ильяс","Аружан","Макс","Лейла"];
 const LOOKS = {hair:["#2b1d14","#6b3e1f","#e2b04a","#c0392b","#1d1d1d","#ff7eb6","#5ee7ff"],skin:["#f6cfae","#e0a87e","#b97a50","#ffe1c8"],shirt:["#B8E351","#5ee7ff","#ff7eb6","#ffd84d","#b48cff","#ff9f43","#ffffff"]};
-const CLIENTS = ["Кофейня «Зерно»","Барбершоп «Борода»","Клиника «Улыбка»","Шиномонтаж 24","Цветы у Ашота","Фитнес «Пульс»","Пекарня «Булка»","Школа английского","Салон «Лайм»","Тётя Галя"];
 
 // ===================== СОСТОЯНИЕ =====================
 const KEY = "vibecoder_studio_v5";
@@ -388,10 +392,11 @@ function newGame(){
   return { studio:"", player:"", tier:null, can:{design:false,flow:false}, search:null, money:START_MONEY, day:1, fans:0, rp:0, best:62, earned:0, debt:0, uid:1,
     workers:[{id:0,name:"Ты",me:true,look:{hair:"#2b1d14",skin:"#f6cfae",shirt:"#B8E351"},d:3,t:3,r:2,salary:0,train:null}],
     job:null, products:[], contracts:[], nextContracts:1, cands:[], research:{}, niches:{coffee:1,barber:1,wb:1,beauty:1}, types:{landing:1,bot:1}, sizes:{s:1},
-    tools:{gpt:true}, office:"flat", known:{}, fitKnown:{}, rivals:RIVALS.map(([n,r])=>({name:n,rev:r,g:rnd(.03,.07)})),
+    tools:{}, laptop:"mid", office:"flat", known:{}, fitKnown:{}, rivals:RIVALS.map(([n,r])=>({name:n,rev:r,g:rnd(.03,.07)})),
     nextEvent:16, season:{best:0,start:1}, awards:[], hype:1, investor:false, flags:{}, tutorial:false, over:false, stats:{released:0,contracts:0} };
 }
 let S=(()=>{ try{ const s=JSON.parse(localStorage.getItem(KEY)); return s&&s.workers&&("tier" in s)?s:newGame(); }catch{ return newGame(); } })();
+if(S.job&&S.job.kind!=="product"&&S.job.kind!=="contract"){ S.job.cat=S.job.kind; S.job.kind="contract"; }
 const save=()=>{ if(!resetting) localStorage.setItem(KEY,JSON.stringify(S)); };
 const uid=()=>S.uid++;
 
@@ -434,9 +439,10 @@ function work(f){
   let phase=null;
   if(j.kind==="product"){ phase=PHASES[j.phase].opts[j.emph[j.phase]]; }
   avail().forEach(w=>{
-    const d=(w.d+ownAI())*f*rnd(.7,1.3)*toolMult("d")*(phase?.d||1), t=(w.t+ownAI())*f*rnd(.7,1.3)*toolMult("t")*(phase?.t||1);
+    const lp=w.me?LAPTOPS[S.laptop||"mid"]:null, lm=lp?lp.mult:1;
+    const d=(w.d+ownAI())*f*rnd(.7,1.3)*toolMult("d")*(phase?.d||1)*lm, t=(w.t+ownAI())*f*rnd(.7,1.3)*toolMult("t")*(phase?.t||1)*lm;
     j.D+=d; j.T+=t; S.rp+=w.r*f*.36;
-    if(j.kind==="product"){ const b=f*.28*(1-Math.min(.85,w.t/14))*(phase?.b||1)*(S.research.beta?.7:1); j.bugs+=b; if(Math.random()<b*2.2) bubble(w.id,"b"); }
+    if(j.kind==="product"){ const b=f*.28*(1-Math.min(.85,w.t/14))*(phase?.b||1)*(S.research.beta?.7:1)*(lp?lp.bug:1); j.bugs+=b; if(Math.random()<b*2.2) bubble(w.id,"b"); }
     if(Math.random()<d*.9) bubble(w.id,"d"); if(Math.random()<t*.9) bubble(w.id,"t");
   });
   if(j.kind==="product"){
@@ -473,14 +479,14 @@ function newDay(){
   if(dim()===1) monthEnd();
   if(S.day%3===0) sync();
   // топ-5 впервые: мягко про курс
-  if(!S.flags.top5&&myRank()<=5){ S.flags.top5=1; pending.push(()=>modal(`<div class="emo">🏆</div><h2>Ты в топ-5 студий!</h2><p class="c">Обошёл «${S.rivals.sort((a,b)=>a.rev-b.rev)[4]?.name||"конкурентов"}». Неплохо для студии из квартиры.</p><button class="big-btn" data-close>Ура</button><p class="c" style="margin:12px 0 0;font-size:12.5px">Кстати, так зарабатывают и в жизни. <a href="#" id="soft-course" style="color:#4e7d17">Как?</a></p>`)); }
+  if(!S.flags.top5&&myRank()<=5){ S.flags.top5=1; pending.push(()=>modal(`<div class="emo">🏆</div><h2>Ты в топ-5 студий!</h2><p class="c">Ты обошёл половину конкурентов. Неплохо для студии, которая начиналась с одного ноутбука.</p><button class="big-btn" data-close>Ура</button><p class="c" style="margin:12px 0 0;font-size:12.5px">Кстати, так зарабатывают и в жизни. <a href="#" id="soft-course" style="color:#4e7d17">Как?</a></p>`)); }
 }
 function monthEnd(){
   const c=monthlyCost(); S.money-=c.total;
   if(S.money<0) S.debt++; else S.debt=0;
   if(S.debt>=2) return bankrupt();
   modal(`<div class="emo">🧾</div><h2>Счета за ${month()-1}-й месяц</h2>
-    <table class="table"><tr><td>Жизнь</td><td>−${fmt(c.life)} ₽</td></tr>${c.rent?`<tr><td>Аренда</td><td>−${fmt(c.rent)} ₽</td></tr>`:""}${c.salary?`<tr><td>Зарплаты</td><td>−${fmt(c.salary)} ₽</td></tr>`:""}${c.tools?`<tr><td>Нейросети</td><td>−${fmt(c.tools)} ₽</td></tr>`:""}${c.channels?`<tr><td>Авито</td><td>−${fmt(c.channels)} ₽</td></tr>`:""}
+    <table class="table">${LIVING.map(([i,n,v])=>`<tr><td>${i} ${n}</td><td>−${fmt(v)} ₽</td></tr>`).join("")}${c.rent?`<tr><td>Аренда</td><td>−${fmt(c.rent)} ₽</td></tr>`:""}${c.salary?`<tr><td>Зарплаты</td><td>−${fmt(c.salary)} ₽</td></tr>`:""}${c.tools?`<tr><td>Нейросети</td><td>−${fmt(c.tools)} ₽</td></tr>`:""}${c.channels?`<tr><td>Авито</td><td>−${fmt(c.channels)} ₽</td></tr>`:""}
     <tr><td><b>На счету</b></td><td style="color:${S.money<0?"var(--red)":"#4e7d17"}">${fmt(S.money)} ₽</td></tr></table>
     ${S.money<0?`<div class="tipline">⚠️ Ты в минусе. Ещё один месяц в минусе, и студия закроется. Бери заказы, они дают быстрые деньги</div>`:""}
     <button class="big-btn" data-close>Дальше</button>`);
@@ -491,7 +497,7 @@ function bankrupt(){
   modal(`<div class="emo">💸</div><h2>Студия закрылась</h2><p class="c">Два месяца в минусе. Кот съел последний сырник, арендодатель забрал ноутбук.</p>
     <table class="table"><tr><td>Продержался</td><td>${S.day} дн.</td></tr><tr><td>Выпустил продуктов</td><td>${S.stats.released}</td></tr><tr><td>Заработал всего</td><td>${fmt(S.earned)} ₽</td></tr></table>
     <button class="big-btn" id="restart">Попробовать снова</button><p class="c" style="margin:12px 0 0;font-size:12.5px">В жизни студии тоже прогорают без клиентов. <a href="#" id="soft-course" style="color:#4e7d17">Как этого избежать</a></p>`);
-  $("restart").onclick=()=>{ const pl=S.player, st=S.studio; S=newGame(); S.player=pl; S.studio=st; S.workers[0].name=pl||"Ты"; S.tutorial=true; closeModal(); save(); chooseTier(); };
+  $("restart").onclick=()=>{ const pl=S.player, st=S.studio; S=newGame(); S.player=pl; S.studio=st; S.workers[0].name=pl||"Ты"; S.tutorial=true; closeModal(); save(); openSetup(); };
 }
 
 // ===================== НОВЫЙ ПРОДУКТ =====================
@@ -538,7 +544,7 @@ function askPhase(){
   const j=S.job, ph=PHASES[j.phase]; waitingPhase=true;
   const known=S.known[j.type]||{};
   modal(`<div class="step-lbl" style="text-align:center">Фаза ${j.phase+1} из 3</div><h2>${ph.name}: на чём делаем упор?</h2>
-    ${tActive&&j.phase===0?`<div class="tipline">💡 Для ботов главное логика: чтобы запись работала без сбоев</div>`:""}
+    ${tActive&&j.phase===0?`<div class="tipline">💡 ${j.type==="bot"?"Для ботов главное логика: чтобы запись работала без сбоев":j.type==="landing"?"Для сайтов главное красота: клиент встречает по картинке":"Подумай, что важнее всего для такого продукта"}</div>`:""}
     ${ph.opts.map((o,i)=>`<button class="choice ${known[j.phase]===i?"best":""}" data-emph="${i}"><span class="e">${o.ico}</span><div class="grow"><b>${o.name}${known[j.phase]===i?" ✓":""}</b><small>${known[j.phase]===i?"Так раньше сработало лучше всего":o.hint}</small></div></button>`).join("")}`);
   $("sheet").onclick=e=>{ const b=e.target.closest("[data-emph]"); if(!b) return;
     j.emph[j.phase]=+b.dataset.emph; waitingPhase=false; closeModal(); haptic("success");
@@ -629,7 +635,7 @@ function genContracts(n=3,add=false){
   const list=chosen.map(([client,what,kind])=>{
     const needD=Math.round(P*rnd(1.2,2.6)*(kind==="d"?1.6:kind==="t"?.4:1)), needT=Math.round(P*rnd(1.2,2.6)*(kind==="t"?1.6:kind==="d"?.4:1));
     const days=Math.round((needD+needT)/P*rnd(.9,1.3))+1, pay=Math.round((needD+needT)*rnd(90,120)*pm/500)*500;
-    return {id:uid(),client,what,kind,needD,needT,days,pay,penalty:Math.round(pay*.5/500)*500};
+    return {id:uid(),client,what,cat:kind,needD,needT,days,pay,penalty:Math.round(pay*.5/500)*500};
   });
   S.recentJobs=[...(S.recentJobs||[]),...list.map(c=>c.what)].slice(-15);
   S.contracts=add?[...S.contracts,...list].slice(-5):list; return list.length;
@@ -644,7 +650,7 @@ function openContracts(){
   modal(`<h2>Заказы</h2><p class="c">Быстрые деньги. Набери нужные очки до срока, иначе штраф</p>
     ${tActive?`<div class="tipline">💡 Заказы спасают, когда денег мало. Сейчас вернись и сделай свой продукт</div>`:""}
     ${S.contracts.map(c=>`<div class="panel" style="margin-bottom:10px"><div class="row"><div class="grow"><h3 style="font-size:14.5px">${c.what}</h3><div class="sm">${c.client} · срок ${c.days} дн.</div></div><div style="font-family:var(--dp);font-weight:800;color:#4e7d17;white-space:nowrap">${fmt(c.pay)} ₽</div></div>
-      <div class="pts"><span class="tag ${c.kind==="d"?"":c.kind==="t"?"":"good"}">${c.kind==="d"?"🎨 дизайн":c.kind==="t"?"💻 код":"🧩 всё вместе"}</span></div><div class="pts"><span class="pt d">🎨 ${c.needD}</span><span class="pt t">💻 ${c.needT}</span><span class="pt n">штраф ${fmt(c.penalty)} ₽</span></div>
+      <div class="pts"><span class="tag ${c.cat==="d"?"":c.cat==="t"?"":"good"}">${c.cat==="d"?"🎨 дизайн":c.cat==="t"?"💻 код":"🧩 всё вместе"}</span></div><div class="pts"><span class="pt d">🎨 ${c.needD}</span><span class="pt t">💻 ${c.needT}</span><span class="pt n">штраф ${fmt(c.penalty)} ₽</span></div>
       <button class="big-btn alt" style="margin-top:10px;padding:11px" data-take="${c.id}">Взять</button></div>`).join("")}
     ${S.contracts.length?"":`<div class="panel" style="text-align:center"><div style="font-size:34px">📭</div><h3>Заказов пока нет</h3></div>`}${searchBox}`);
   $("sheet").onclick=e=>{ const sb=e.target.closest("[data-search]");
@@ -653,7 +659,7 @@ function openContracts(){
       closeModal(); toast("🔎 Ищем клиентов…"); save(); return; }
     const b=e.target.closest("[data-take]"); if(!b) return;
     const c=S.contracts.find(x=>x.id===+b.dataset.take); S.contracts=S.contracts.filter(x=>x!==c);
-    S.job={kind:"contract",...c,D:0,T:0,deadline:S.day+c.days}; closeModal(); toast("📋 Заказ взят. Команда за работой"); save(); };
+    S.job={...c,kind:"contract",D:0,T:0,deadline:S.day+c.days}; closeModal(); toast("📋 Заказ взят. Команда за работой"); save(); };
 }
 function contractDone(ok){
   const j=S.job; S.job=null;
@@ -681,7 +687,7 @@ function fire(id){ const w=S.workers.find(x=>x.id===id); if(!w||w.me) return;
   $("fire-yes").onclick=()=>{ S.workers=S.workers.filter(x=>x!==w); closeModal(); toast(`${w.name} ушёл. Забрал кружку`); save(); }; }
 function trainW(id,stat){ const w=S.workers.find(x=>x.id===id), cost=4000+(w[stat])*1500;
   if(w.train) return; if(S.money<cost) return toast(`Нужно ${fmt(cost)} ₽`);
-  S.money-=cost; w.train={stat,until:S.day+5}; toast(`📚 ${w.name} на курсах 5 дней`); save(); }
+  S.money-=cost; w.train={stat,until:S.day+5}; toast(S.job&&!avail().length?`📚 ${w.name} на курсах 5 дней. Работа пока стоит, а срок идёт`:`📚 ${w.name} на курсах 5 дней`); save(); }
 function doResearch(id){ const r=RESEARCH.find(x=>x.id===id);
   if(S.research[id]) return; if(S.rp<r.rp) return toast(`Нужно ${r.rp} 🔬. Наука копится во время работы`);
   S.rp-=r.rp; S.research[id]=1;
@@ -703,6 +709,9 @@ function toggleTool(id){ S.tools[id]=!S.tools[id]; const t=TOOLS.find(x=>x.id===
 
 // ===================== СОБЫТИЯ =====================
 const EVENTS = [
+  {when:()=>S.laptop==="old", ico:"🥔", t:"Старый ноут задымился", p:"Пахнет жареной картошкой. Похоже, кулер всё.",
+    a:["Починить за 6 000 ₽",()=>{ S.money-=6000; return "−6 000 ₽. Ноут жив, но ненадолго"; }],
+    b:["Купить нормальный за 30 000 ₽",()=>{ S.money-=30000; S.laptop="mid"; return "−30 000 ₽. Новый ноутбук, работаешь быстрее"; }]},
   {when:()=>true, ico:"🐈", t:"Кот прошёлся по клавиатуре", p:"…и задеплоил в прод. Сайт клиента теперь на латыни.",
     a:["Откатить всё назад",()=>{ S.money-=3000; return "−3 000 ₽ на срочного админа. Кот под домашним арестом"; }],
     b:["Сказать, что так задумано",()=>{ if(Math.random()<.5){ S.fans+=150; return "Клиенту понравилось! +150 фанатов. Кот получает премию"; } S.fans=Math.max(0,S.fans-100); return "Не прокатило. −100 фанатов"; }]},
@@ -740,7 +749,58 @@ function seasonAward(){
   else modal(`<div class="emo">🎭</div><h2>Премия «Золотой промт»</h2><p class="c">В этом сезоне победила «${pick(S.rivals).name}». Чтобы попасть в номинацию, нужна оценка от 8.</p><button class="big-btn" data-close>Ну и ладно</button>`);
 }
 
-// ===================== СТАРТ: ВЫБОР ОБУЧЕНИЯ =====================
+// ===================== СТАРТ: ПОДГОТОВКА =====================
+const LAPTOPS = {
+  old:{name:"Старый ноут с Авито",ico:"🥔",price:15000,mult:.8,bug:1.3,desc:"Тормозит, греется, багов больше"},
+  mid:{name:"Нормальный ноутбук",ico:"💻",price:30000,mult:1,bug:1,desc:"Рабочая лошадка без сюрпризов"},
+  mac:{name:"MacBook Pro",ico:"🍏",price:45000,mult:1.25,bug:.85,desc:"Летает. Но денег почти не останется"},
+};
+// расходы на жизнь по строкам (в сумме LIFE)
+const LIVING = [["🍜","Еда",7000],["🐈","Корм коту",1500],["📶","Интернет и телефон",1000],["🚌","Транспорт",500]];
+let setup=null;
+function openSetup(){
+  setup=setup||{laptop:null,tier:null,tools:{gpt:true}};
+  const draw=()=>{
+    const lp=setup.laptop?LAPTOPS[setup.laptop].price:0, tr=setup.tier?TIERS[setup.tier].price:0;
+    const tools=TOOLS.filter(t=>setup.tools[t.id]), toolsCost=tools.reduce((a,t)=>a+t.cost,0);
+    const left=START_MONEY-lp-tr-toolsCost, monthly=LIFE+toolsCost+(setup.tier&&TIERS[setup.tier].avito?AVITO_COST:0);
+    const months=left/monthly, ready=setup.laptop&&setup.tier&&left>=0;
+    $("sheet").innerHTML=`<div class="setup-top"><div class="sm">Осталось из ${fmt(START_MONEY)} ₽</div><div class="setup-left ${left<0?"neg":left<monthly?"warn":""}">${fmt(left)} ₽</div>
+      <div class="sm">${left<0?"Не хватает денег":`Хватит на ${months<1?"меньше месяца":months.toFixed(1).replace(".",",")+" мес."} без заказов`}</div></div>
+      <h2 style="margin-top:4px">Подготовка к старту</h2><p class="c">Распредели деньги. Всё потратить нельзя: впереди еда, кот и подписки</p>
+      <div class="step-lbl">1. Ноутбук · обязательно</div>
+      ${Object.entries(LAPTOPS).map(([k,l])=>`<button class="choice ${setup.laptop===k?"best":""}" data-lap="${k}"><span class="e">${l.ico}</span><div class="grow"><b>${l.name}</b><small>${l.desc} · скорость ×${String(l.mult).replace(".",",")}</small></div><b style="white-space:nowrap">${fmt(l.price)} ₽</b></button>`).join("")}
+      <div class="step-lbl" style="margin-top:12px">2. Обучение · обязательно</div>
+      ${Object.entries(TIERS).map(([k,t])=>`<button class="choice ${setup.tier===k?"best":""}" data-tr="${k}"><span class="e">${t.ico}</span><div class="grow"><b>${t.name}</b><small>${t.pros.join(", ")}${t.cons.length?`<br><span style="color:#b23b3b">${t.cons.join(", ")}</span>`:""}</small></div><b style="white-space:nowrap">${fmt(t.price)} ₽</b></button>`).join("")}
+      <div class="step-lbl" style="margin-top:12px">3. Нейросети · по желанию, каждый месяц</div>
+      ${TOOLS.map(t=>`<button class="choice ${setup.tools[t.id]?"best":""}" data-tl="${t.id}"><span class="e">${t.ico}</span><div class="grow"><b>${t.name}${setup.tools[t.id]?" ✓":""}</b><small>${t.desc}</small></div><b style="white-space:nowrap">${fmt(t.cost)} ₽/мес</b></button>`).join("")}
+      <div class="panel" style="margin-top:6px"><h3>📆 Каждый месяц придётся платить</h3>
+        <table class="table">${LIVING.map(([i,n,v])=>`<tr><td>${i} ${n}</td><td>${fmt(v)} ₽</td></tr>`).join("")}${tools.map(t=>`<tr><td>${t.ico} ${t.name}</td><td>${fmt(t.cost)} ₽</td></tr>`).join("")}${setup.tier&&TIERS[setup.tier].avito?`<tr><td>📢 Авито</td><td>${fmt(AVITO_COST)} ₽</td></tr>`:""}
+        <tr><td><b>Итого в месяц</b></td><td>${fmt(monthly)} ₽</td></tr></table>
+        <div class="sm">Первый месяц нейросетей оплачиваешь сразу. Счета приходят в конце каждого месяца</div></div>
+      <button class="big-btn" id="setup-go" ${ready?"":"disabled"}>${!setup.laptop?"Выбери ноутбук":!setup.tier?"Выбери обучение":left<0?"Не хватает денег":"🚀 Открыть студию"}</button>
+      <p class="c" style="font-size:12px;margin:10px 0 0">Тарифы обучения настоящие, как в курсе «Бизнес на нейросетях». Купить в жизни можно по кнопке 🎓 сверху</p>`;
+  };
+  modal(""); draw();
+  $("sheet").onclick=e=>{ const b=e.target.closest("button"); if(!b) return;
+    if(b.dataset.lap) setup.laptop=b.dataset.lap;
+    if(b.dataset.tr) setup.tier=b.dataset.tr;
+    if(b.dataset.tl) setup.tools[b.dataset.tl]=!setup.tools[b.dataset.tl];
+    if(b.id==="setup-go") return confirmSetup();
+    haptic("light"); const st=$("sheet").scrollTop; draw(); $("sheet").scrollTop=st; };
+}
+function confirmSetup(){
+  const tools=TOOLS.filter(t=>setup.tools[t.id]), toolsCost=tools.reduce((a,t)=>a+t.cost,0);
+  const left=START_MONEY-LAPTOPS[setup.laptop].price-TIERS[setup.tier].price-toolsCost, monthly=LIFE+toolsCost+(TIERS[setup.tier].avito?AVITO_COST:0);
+  if(left<monthly&&!setup.sure){
+    modal(`<div class="emo">😬</div><h2>Денег впритык</h2><p class="c">Останется ${fmt(left)} ₽, а в конце месяца придут счета на ${fmt(monthly)} ₽. Если не успеешь заработать, коту будет грустно</p>
+      <button class="big-btn alt" id="sure-yes">Рискну</button><button class="big-btn ghost" id="sure-no">Пересобрать</button>`);
+    $("sure-yes").onclick=()=>{ setup.sure=true; confirmSetup(); }; $("sure-no").onclick=()=>openSetup(); return;
+  }
+  applyTier(setup.tier,{laptop:setup.laptop,tools:{...setup.tools},left}); setup=null;
+}
+
+// ===================== СТАРТ: ИМЕНА И ТАРИФ =====================
 function askNames(){
   const tgName=tg?.initDataUnsafe?.user?.first_name||"";
   const ideas=["Вайб Студио","Нейро-Мастерская","Промт и Точка","Кодим с котом","Студия «Завтра сдадим»","Сырник Digital"];
@@ -749,23 +809,13 @@ function askNames(){
     <div class="step-lbl" style="margin-top:12px">Название студии</div><div class="row"><input class="inp grow" id="in-studio" maxlength="24" placeholder="Например, Вайб Студио" value="${(S.studio||pick(ideas)).replace(/"/g,"")}"><button class="mini-btn" id="in-dice">🎲</button></div>
     <button class="big-btn" id="in-go" style="margin-top:16px">Дальше</button>`);
   $("in-dice").onclick=()=>{ $("in-studio").value=pick(ideas); haptic("light"); };
-  $("in-go").onclick=()=>{ const pl=$("in-player").value.trim(), st=$("in-studio").value.trim();
+  $("in-go").onclick=()=>{ const pl=$("in-player").value.replace(/[<>"&]/g,"").trim(), st=$("in-studio").value.replace(/[<>"&]/g,"").trim();
     if(!pl) return toast("Напиши своё имя"); if(!st) return toast("Придумай название студии");
-    S.player=pl; S.studio=st; S.workers[0].name=pl; save(); chooseTier(); };
+    S.player=pl; S.studio=st; S.workers[0].name=pl; save(); openSetup(); };
 }
-function chooseTier(){
-  modal(`<div class="emo">🎒</div><h2>У тебя ${fmt(START_MONEY)} ₽ и мечта</h2>
-    <p class="c">Чтобы зарабатывать на нейросетях, сначала нужно научиться. От обучения зависит, с чем ты начнёшь</p>
-    ${Object.entries(TIERS).map(([k,t])=>`<div class="panel" style="${k==="earn"?"background:#e9f8c6":""}">
-      <div class="row"><div class="ic">${t.ico}</div><div class="grow"><h3>${t.name}${k==="earn"?' <span class="tag good">баланс</span>':""}</h3><div class="sm">останется ${fmt(START_MONEY-t.price)} ₽</div></div><div style="font-family:var(--dp);font-weight:800;white-space:nowrap">${t.price.toLocaleString("ru-RU")} ₽</div></div>
-      <div style="margin-top:8px">${t.pros.map(x=>`<div class="sm" style="color:#2f5a0d">✓ ${x}</div>`).join("")}${t.cons.map(x=>`<div class="sm" style="color:#b23b3b">✗ ${x}</div>`).join("")}</div>
-      <div class="row" style="margin-top:6px;gap:6px"><span class="pt d" style="font-size:12px">🎨 ${t.d}</span><span class="pt t" style="font-size:12px">💻 ${t.t}</span><span class="pt r" style="font-size:12px">🔬 ${t.r}</span></div>
-      <button class="big-btn ${k==="earn"?"":"ghost"}" style="margin-top:10px;padding:12px" data-tier="${k}">Учиться на «${t.name}»</button></div>`).join("")}
-    <p class="c" style="font-size:12px;margin:4px 0 0">Это настоящие тарифы курса «Бизнес на нейросетях». Купить в жизни можно по кнопке 🎓 сверху</p>`);
-  $("sheet").onclick=e=>{ const b=e.target.closest("[data-tier]"); if(!b) return; applyTier(b.dataset.tier); };
-}
-function applyTier(k){
-  const t=TIERS[k]; S.tier=k; S.money=START_MONEY-t.price; S.best=t.bar;
+function applyTier(k,o={}){
+  const t=TIERS[k]; S.tier=k; S.money=o.left??(START_MONEY-t.price); S.best=t.bar;
+  S.laptop=o.laptop||"mid"; if(o.tools) S.tools=o.tools;
   Object.assign(S.workers[0],{d:t.d,t:t.t,r:t.r});
   S.can={design:t.design,flow:t.flow};
   S.contracts=[]; if(t.flow){ genContracts(4); S.nextContracts=S.day+t.every; }
@@ -778,7 +828,7 @@ function applyTier(k){
 function openCourse(){
   modal(`<div class="emo">🎓</div><h2>Вайб-кодинг в жизни</h2><p class="c">Всё, что ты делаешь в игре, можно делать по-настоящему: сайты, боты и приложения с помощью нейросетей. Этому учит курс «Бизнес на нейросетях»</p>
     ${TARIFFS.map(t=>`<div class="panel" style="margin-bottom:10px;${t.hot?"background:#e9f8c6":""}"><div class="row"><div class="grow"><h3>${t.name}${t.hot?' <span class="tag good">популярный</span>':""}</h3><div class="sm">${t.desc}</div></div><div style="font-family:var(--dp);font-weight:800;white-space:nowrap">${t.price.toLocaleString("ru-RU")} ₽</div></div><button class="big-btn ${t.hot?"":"ghost"}" style="margin-top:10px;padding:11px" data-plan="${t.id}">Написать наставнику</button></div>`).join("")}
-    <button class="big-btn ghost" id="course-more">Подробнее о курсе ↗</button>`);
+    <button class="big-btn ghost" id="course-more">Подробнее о курсе ↗</button><button class="big-btn ghost" data-close>Вернуться в игру</button>`);
   event("course_opened");
   $("sheet").onclick=e=>{ const b=e.target.closest("[data-plan]"); if(b) return openPlan(b.dataset.plan);
     if(e.target.id==="course-more"){ event("course_page_opened"); tg?.openLink?tg.openLink(COURSE_URL):window.open(COURSE_URL,"_blank"); } };
@@ -873,8 +923,7 @@ function render(){
   $("cash").textContent=fmt(S.money)+" ₽"; $("cash").classList.toggle("neg",S.money<0);
   if(lastMoney!==null&&Math.abs(S.money-lastMoney)>=1){ const d=S.money-lastMoney, el=document.createElement("div"); el.className="delta "+(d>0?"plus":"minus"); el.textContent=(d>0?"+":"−")+fmt(Math.abs(d))+" ₽"; $("cashwrap").appendChild(el); setTimeout(()=>el.remove(),1400); }
   lastMoney=S.money;
-  const r=myRank();
-  setHTML("chips",`${S.tier?`<span class="chip">${TIERS[S.tier].ico} ${TIERS[S.tier].name}</span>`:""}<span class="chip">📅 Месяц ${month()}, день ${dim()}</span><span class="chip">👥 ${fmt(S.fans)}</span><span class="chip">🔬 ${Math.floor(S.rp)}</span><span class="chip">🏆 ${r} место</span>${spd===0?'<span class="chip" style="background:var(--yel);color:var(--ink)">⏸ пауза</span>':""}`);
+  setHTML("chips",`<span class="chip">📅 Месяц ${month()}, день ${dim()}</span><span class="chip">👥 ${fmt(S.fans)}</span><span class="chip">🔬 ${Math.floor(S.rp)}</span>${spd===0?'<span class="chip" style="background:var(--yel);color:var(--ink)">⏸ пауза</span>':""}`);
   const c=monthlyCost(), left=MONTH-dim()+1;
   $("bills-t").innerHTML=`Счета через ${left} дн.: <b>${fmt(c.total)} ₽</b>`;
   $("bills-bar").style.width=dim()/MONTH*100+"%"; $("bills").classList.toggle("warn",S.money<c.total);
@@ -922,6 +971,7 @@ function renderTeam(){
     ${w.train?"":`<div class="row" style="margin-top:10px;gap:6px"><button class="mini-btn" style="flex:1;background:var(--pink)" data-train="${w.id}:d">+🎨 ${fmt(4000+w.d*1500)} ₽</button><button class="mini-btn" style="flex:1;background:var(--cyan)" data-train="${w.id}:t">+💻 ${fmt(4000+w.t*1500)} ₽</button></div>`}</div>`).join(""));
   setHTML("cands", !S.research.hire?`<div class="panel" style="text-align:center"><div style="font-size:34px">🔒</div><h3>Найм закрыт</h3><div class="sm">Исследуй «Первый сотрудник» в «Науке»</div></div>`
     :`<div class="title" style="font-size:16px">Кандидаты</div>`+S.cands.map(c=>`<div class="panel"><div class="row"><div class="ic" style="background:${c.look.shirt}">🧑‍💻</div><div class="grow"><h3>${c.name}</h3><div class="sm">${{d:"дизайнер",t:"разработчик",r:"исследователь",u:"универсал"}[c.role]} · ${fmt(c.salary)} ₽/мес</div></div><button class="mini-btn" data-hire="${c.id}">Нанять</button></div>${statBar("🎨 Дизайн",c.d,"var(--pink)")}${statBar("💻 Код",c.t,"var(--cyan)")}${statBar("🔬 Наука",c.r,"var(--pur)")}</div>`).join("")+`<p class="lead">Новые кандидаты появятся после следующего релиза</p>`);
+  setHTML("laptops", Object.entries(LAPTOPS).map(([k,l])=>`<div class="panel"><div class="row"><div class="ic">${l.ico}</div><div class="grow"><h3>${l.name}</h3><div class="sm">${l.desc} · скорость ×${String(l.mult).replace(".",",")}</div></div>${S.laptop===k?'<span class="mini-btn done">Твой</span>':LAPTOPS[S.laptop||"mid"].price>=l.price?"":`<button class="mini-btn ${S.money<l.price?"off":""}" data-laptop="${k}">${fmt(l.price)} ₽</button>`}</div></div>`).join(""));
   setHTML("offices", OFFICES.map(o=>`<div class="panel"><div class="row"><div class="ic">${o.ico}</div><div class="grow"><h3>${o.name}</h3><div class="sm">${o.desks} ${o.desks===1?"место":o.desks<5?"места":"мест"} · ${o.rent?fmt(o.rent)+" ₽/мес":"без аренды"}${o.move?" · переезд "+fmt(o.move)+" ₽":""}</div></div>${S.office===o.id?'<span class="mini-btn done">Ты здесь</span>':`<button class="mini-btn ${S.money<o.move?"off":""}" data-office="${o.id}">Переехать</button>`}</div></div>`).join(""));
   setHTML("tools", TOOLS.map(t=>`<div class="panel"><div class="row"><div class="ic">${t.ico}</div><div class="grow"><h3>${t.name}</h3><div class="sm">${t.desc} · ${fmt(t.cost*S.workers.length)} ₽/мес</div></div><button class="mini-btn ${S.tools[t.id]?"done":""}" data-tool="${t.id}">${S.tools[t.id]?"Вкл ✓":"Подключить"}</button></div></div>`).join(""));
 }
@@ -934,8 +984,10 @@ function renderLab(){
 
 // ===================== ОКНА =====================
 function modal(h){ $("sheet").innerHTML=h; $("sheet").onclick=null; $("sheet").scrollTop=0; $("modal").classList.add("show"); }
-function closeModal(){ $("modal").classList.remove("show"); }
-$("modal").addEventListener("click",e=>{ if(e.target.closest("[data-close]")) return closeModal(); if(e.target.id==="soft-course"){ e.preventDefault(); closeModal(); openCourse(); } if(e.target.id==="modal"&&!S.over&&!waitingPhase&&!tActive&&S.tier) closeModal(); });
+function closeModal(){ $("modal").classList.remove("show");
+  // пока не выбраны имя и обучение, игра не начинается: возвращаем на подготовку
+  if(!S.tier&&!S.over&&!resetting) setTimeout(()=>{ if(!modalOpen()) (S.studio?openSetup():askNames()); },0); }
+$("modal").addEventListener("click",e=>{ if(e.target.closest("[data-close]")) return closeModal(); if(e.target.id==="soft-course"){ e.preventDefault(); closeModal(); openCourse(); } if(e.target.id==="modal"&&!S.over&&!waitingPhase&&!tActive&&S.tier&&!setup) closeModal(); });
 let toastT; function toast(t){ if(!t) return; const el=$("toast"); el.textContent=t; el.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove("show"),2800); }
 function coins(){ for(let i=0;i<10;i++) setTimeout(()=>{ const c=document.createElement("div"); c.textContent=pick(["💸","🪙","💰"]); c.style.cssText=`position:fixed;z-index:140;pointer-events:none;font-size:26px;left:${innerWidth/2+rnd(-120,120)}px;top:${innerHeight*.45+rnd(-50,50)}px;transition:transform 1s ease-out,opacity 1s`; document.body.appendChild(c); requestAnimationFrame(()=>{ c.style.transform=`translateY(-150px) rotate(${rnd(-40,40)}deg)`; c.style.opacity="0"; }); setTimeout(()=>c.remove(),1100); },i*50); }
 function haptic(t){ const h=tg?.HapticFeedback; if(!h) return; try{ t==="light"?h.impactOccurred("light"):h.notificationOccurred(t); }catch{} }
@@ -1005,6 +1057,7 @@ document.body.addEventListener("click",e=>{
   if(b=g("fire")) return fire(+b.dataset.fire);
   if(b=g("train")){ const [id,st]=b.dataset.train.split(":"); return trainW(+id,st); }
   if(b=g("office")) return moveOffice(b.dataset.office);
+  if(b=g("laptop")){ const l=LAPTOPS[b.dataset.laptop]; if(S.money<l.price) return toast("Не хватает денег"); S.money-=l.price; S.laptop=b.dataset.laptop; toast(`${l.ico} Новый ноутбук! Старый отдал коту`); haptic("success"); return save(); }
   if(b=g("tool")) return toggleTool(b.dataset.tool);
   if(b=g("res")) return doResearch(b.dataset.res);
   if(b=g("niche-open")) return openNiche(b.dataset.nicheOpen);
@@ -1018,8 +1071,9 @@ function openSettings(){
     <button class="big-btn" id="st-save" style="margin-top:14px">Сохранить</button>
     <button class="big-btn ghost" id="st-tut">📖 Пройти обучение заново</button>
     <button class="big-btn pink" id="st-reset">🔄 Начать игру заново</button>
+    <button class="big-btn ghost" data-close>Закрыть</button>
     <p class="c" style="font-size:12px;margin:12px 0 0">Тариф: ${S.tier?TIERS[S.tier].ico+" "+TIERS[S.tier].name:"не выбран"} · день ${S.day}</p>`);
-  $("st-save").onclick=()=>{ const pl=$("st-player").value.trim(), st=$("st-studio").value.trim(); if(pl){ S.player=pl; S.workers[0].name=pl; } if(st) S.studio=st; save(); closeModal(); toast("Сохранено"); };
+  $("st-save").onclick=()=>{ const pl=$("st-player").value.replace(/[<>"&]/g,"").trim(), st=$("st-studio").value.replace(/[<>"&]/g,"").trim(); if(pl){ S.player=pl; S.workers[0].name=pl; } if(st) S.studio=st; save(); closeModal(); toast("Сохранено"); };
   $("st-tut").onclick=()=>{ closeModal(); switchTab("home",true); startTut(); };
   $("st-reset").onclick=()=>{ modal(`<div class="emo">🔄</div><h2>Начать заново?</h2><p class="c">Весь прогресс пропадёт: деньги, команда, продукты. Снова выберешь имя и обучение.</p><button class="big-btn pink" id="rs-yes">Да, заново</button><button class="big-btn ghost" data-close>Отмена</button>`);
     $("rs-yes").onclick=()=>{ resetting=true; localStorage.removeItem(KEY); location.reload(); }; };
@@ -1035,7 +1089,7 @@ setInterval(speak,3800);
 setInterval(save,4000);
 setInterval(sync,20000);
 document.addEventListener("visibilitychange",()=>{ if(document.hidden){ save(); sync(); } else lastT=performance.now(); });
-if(S.over) bankrupt(); else if(!S.tier) (S.studio?chooseTier():askNames()); else if(S.job?.kind==="product"&&S.job.emph[S.job.phase]===null) askPhase(); else if(!S.tutorial) startTut();
+if(S.over) bankrupt(); else if(!S.tier) (S.studio?openSetup():askNames()); else if(S.job?.kind==="product"&&S.job.emph[S.job.phase]===null) askPhase(); else if(!S.tutorial) startTut();
 loadProfile(); save();
 </script>
 </body>
