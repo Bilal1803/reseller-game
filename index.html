@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Вайб-кодер: Студия</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script async src="https://telegram.org/js/telegram-web-app.js" onload="window.onTgReady&&window.onTgReady()"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Unbounded:wght@600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Unbounded:wght@600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
 :root{
   --bg:#1b1f3b; --bg2:#262b52; --ink:#1b1f3b; --paper:#fffaf0; --paper2:#f3ecdc; --lime:#B8E351; --deep:#23430C;
@@ -379,7 +379,7 @@ const CLIENTS = ["Кофейня «Зерно»","Барбершоп «Боро�
 // ===================== СОСТОЯНИЕ =====================
 const KEY = "vibecoder_studio_v5";
 if(new URLSearchParams(location.search).has("reset")){ localStorage.removeItem(KEY); history.replaceState(null,"",location.pathname); }
-const tg = window.Telegram?.WebApp;
+let tg = window.Telegram?.WebApp; // скрипт Telegram грузится в фоне, см. onTgReady
 const WAS_FRESH = !localStorage.getItem(KEY);
 const rnd=(a,b)=>a+Math.random()*(b-a), pick=a=>a[Math.floor(Math.random()*a.length)], clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const look=()=>({hair:pick(LOOKS.hair),skin:pick(LOOKS.skin),shirt:pick(LOOKS.shirt)});
@@ -1024,7 +1024,10 @@ function openSettings(){
   $("st-reset").onclick=()=>{ modal(`<div class="emo">🔄</div><h2>Начать заново?</h2><p class="c">Весь прогресс пропадёт: деньги, команда, продукты. Снова выберешь имя и обучение.</p><button class="big-btn pink" id="rs-yes">Да, заново</button><button class="big-btn ghost" data-close>Отмена</button>`);
     $("rs-yes").onclick=()=>{ resetting=true; localStorage.removeItem(KEY); location.reload(); }; };
 }
-if(tg){ tg.ready(); tg.expand(); try{ tg.setHeaderColor("#1b1f3b"); tg.setBackgroundColor("#1b1f3b"); tg.disableVerticalSwipes?.(); }catch{} }
+function initTg(){ tg=window.Telegram?.WebApp; if(!tg) return; tg.ready(); tg.expand(); try{ tg.setHeaderColor("#1b1f3b"); tg.setBackgroundColor("#1b1f3b"); tg.disableVerticalSwipes?.(); }catch{} }
+// игра не ждёт telegram.org: показывается сразу, а Telegram подключаем, когда скрипт догрузится
+window.onTgReady=()=>{ initTg(); loadProfile(); };
+initTg();
 
 render();
 setInterval(tick,50);
