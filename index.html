@@ -1,15 +1,1039 @@
 <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>reseller-game</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script type="module" crossorigin src="./assets/index-CgC1v69O.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BgxH7QS-.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Вайб-кодер: Студия</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Unbounded:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#1b1f3b; --bg2:#262b52; --ink:#1b1f3b; --paper:#fffaf0; --paper2:#f3ecdc; --lime:#B8E351; --deep:#23430C;
+  --pink:#ff7eb6; --cyan:#5ee7ff; --yel:#ffd84d; --red:#ff5d5d; --pur:#b48cff; --org:#ff9f43;
+  --mu:#6d6a7c; --w:#fff; --dp:"Unbounded","Manrope",sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font:700 15px/1.4 "Manrope",-apple-system,"Segoe UI",Roboto,sans-serif;user-select:none;-webkit-user-select:none}
+body{background:radial-gradient(circle at 20% 0%,#3a3f7a 0,transparent 45%),radial-gradient(circle at 100% 60%,#2d3470 0,transparent 40%),var(--bg)}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
+.app{display:flex;flex-direction:column;height:100%;max-width:480px;margin:0 auto;position:relative}
+
+/* ===== верхняя панель ===== */
+.hud{padding:10px 12px 6px;color:var(--w)}
+.hud-row{display:flex;align-items:center;gap:8px}
+.cash{font-family:var(--dp);font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.1;color:var(--yel);text-shadow:0 3px 0 rgba(0,0,0,.35);white-space:nowrap}
+.cash.neg{color:var(--red)}
+.cash-wrap{position:relative;flex:1;min-width:0}
+.iconbtn{width:38px;height:38px;border-radius:12px;background:var(--bg2);border:2px solid rgba(255,255,255,.12);display:grid;place-items:center;font-size:18px}
+.speed{display:flex;background:var(--bg2);border:2px solid rgba(255,255,255,.12);border-radius:12px;padding:2px}
+.speed button{width:32px;height:30px;border-radius:9px;font-size:13px;color:rgba(255,255,255,.6)}
+.speed button.on{background:var(--lime);color:var(--ink)}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
+.chips::-webkit-scrollbar{display:none}
+.course-btn{display:flex;align-items:center;gap:6px;height:42px;padding:0 14px 0 10px;border-radius:14px;background:linear-gradient(135deg,var(--pink),#ff9f43);border:2px solid var(--ink);box-shadow:0 3px 0 #0b0d1f;font-size:20px;color:var(--ink);animation:glow 2.6s ease-in-out infinite}
+.course-btn span{display:flex;flex-direction:column;align-items:flex-start;font-family:var(--dp);font-size:14px;font-weight:800;line-height:1}
+.course-btn small{font-family:"Manrope";font-size:10.5px;font-weight:800;opacity:.75;margin-top:2px}
+.course-btn:active{transform:translateY(2px);box-shadow:0 1px 0 #0b0d1f}
+@keyframes glow{50%{filter:brightness(1.12)}}
+.iconbtn{height:42px;width:42px}
+.inp{width:100%;padding:13px 14px;border-radius:14px;border:3px solid var(--ink);background:#fff;font:800 16px "Manrope",sans-serif;color:var(--ink);outline:none;-webkit-user-select:text;user-select:text}
+.inp:focus{box-shadow:0 0 0 3px var(--lime)}
+.chip{flex:none;background:var(--bg2);border:2px solid rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;font-size:12.5px;white-space:nowrap;color:var(--w)}
+.bills{margin-top:8px;font-size:12px;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:8px}
+.bills .trk{flex:1;height:8px;background:rgba(255,255,255,.12);border-radius:99px;overflow:hidden}
+.bills .trk i{display:block;height:100%;background:var(--lime);border-radius:99px;transition:width .3s}
+.bills.warn .trk i{background:var(--red)} .bills.warn b{color:var(--red)}
+.bills b{color:var(--w)}
+.delta{position:absolute;left:0;top:30px;font-family:var(--dp);font-size:14px;font-weight:800;pointer-events:none;animation:delta 1.4s ease-out forwards;text-shadow:0 2px 0 rgba(0,0,0,.4)}
+.delta.plus{color:var(--lime)}.delta.minus{color:var(--red)}
+@keyframes delta{0%{opacity:0;transform:translateY(6px)}15%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-18px)}}
+
+/* ===== экраны ===== */
+.screens{flex:1;position:relative;overflow:hidden}
+.screen{position:absolute;inset:0;overflow-y:auto;padding:4px 12px 110px;display:none;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.screen.active{display:block;animation:fade .2s}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}}
+.title{font-family:var(--dp);font-size:19px;font-weight:800;color:var(--w);margin:12px 4px 4px;text-shadow:0 3px 0 rgba(0,0,0,.3)}
+.lead{color:rgba(255,255,255,.7);font-size:13.5px;margin:0 4px 12px;font-weight:600}
+
+/* игровая панель-«бумага» */
+.panel{background:var(--paper);border:3px solid var(--ink);border-radius:20px;box-shadow:0 5px 0 var(--ink);padding:14px;margin-bottom:14px}
+.panel h3{margin:0 0 4px;font-family:var(--dp);font-size:16px;font-weight:800}
+.panel .sm{font-size:13px;color:var(--mu);font-weight:700}
+.row{display:flex;align-items:center;gap:10px}
+.grow{flex:1;min-width:0}
+.ic{width:46px;height:46px;border-radius:14px;background:var(--paper2);border:2px solid var(--ink);display:grid;place-items:center;font-size:23px;flex:none}
+.big-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px;border-radius:16px;background:var(--lime);border:3px solid var(--ink);box-shadow:0 4px 0 var(--ink);font-weight:800;font-size:16px;color:var(--ink);transition:transform .05s,box-shadow .05s}
+.big-btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.big-btn.alt{background:var(--yel)}.big-btn.pink{background:var(--pink)}.big-btn.cyan{background:var(--cyan)}.big-btn.ghost{background:var(--paper2)}
+.big-btn[disabled]{background:#d9d4c7;color:#8b8698}
+.big-btn small{display:block;font-size:12px;font-weight:700;opacity:.75}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.duo .big-btn{flex-direction:column;gap:2px;padding:14px 8px}
+.duo .big-btn .e{font-size:26px;line-height:1}
+.mini-btn{padding:9px 13px;border-radius:12px;background:var(--lime);border:2px solid var(--ink);box-shadow:0 3px 0 var(--ink);font-weight:800;font-size:13px;white-space:nowrap}
+.mini-btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.mini-btn.off{background:#e3ddcf;color:#8b8698}
+.mini-btn.done{background:none;border-color:transparent;box-shadow:none;color:#4e7d17}
+.bar{height:12px;background:#e6dfcf;border:2px solid var(--ink);border-radius:99px;overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:var(--lime);transition:width .2s}
+.pts{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.pt{border:2px solid var(--ink);border-radius:99px;padding:3px 10px;font-size:13px;font-weight:800}
+.pt.d{background:var(--pink)}.pt.t{background:var(--cyan)}.pt.b{background:var(--red);color:#fff}.pt.r{background:var(--pur)}.pt.n{background:var(--paper2)}
+.tag{display:inline-block;border:2px solid var(--ink);border-radius:99px;padding:1px 8px;font-size:11.5px;font-weight:800;margin:4px 4px 0 0;background:var(--paper2)}
+.tag.good{background:var(--lime)}.tag.bad{background:var(--red);color:#fff}.tag.hot{background:var(--org)}
+
+/* ===== пиксельная студия ===== */
+.studio{position:relative;border:3px solid var(--ink);border-radius:20px;box-shadow:0 5px 0 var(--ink);overflow:hidden;margin-bottom:14px;background:#000}
+.studio canvas{display:block;width:100%;image-rendering:pixelated;image-rendering:crisp-edges}
+.studio .sign{position:absolute;left:8px;top:8px;background:var(--paper);border:2px solid var(--ink);border-radius:10px;padding:3px 8px;font-size:12px;font-weight:800}
+.say{position:absolute;transform:translate(-50%,-100%);background:#fff;border:2px solid var(--ink);border-radius:12px;padding:4px 8px;font-size:11.5px;font-weight:800;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;pointer-events:none;animation:pop .2s}
+.say:after{content:"";position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--ink)}
+@keyframes pop{from{transform:translate(-50%,-80%) scale(.6);opacity:0}}
+
+/* ===== меню ===== */
+.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom));width:calc(100% - 20px);max-width:460px;z-index:40;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:6px;border-radius:22px;background:var(--paper);border:3px solid var(--ink);box-shadow:0 5px 0 var(--ink)}
+.nav button{border-radius:15px;padding:6px 2px;font-size:11.5px;font-weight:800;color:var(--mu);display:flex;flex-direction:column;align-items:center;position:relative}
+.nav button span{font-size:21px;line-height:1.15}
+.nav button.active{background:var(--lime);color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink)}
+.nav .dot{position:absolute;top:0;right:calc(50% - 22px);width:12px;height:12px;border-radius:50%;background:var(--red);border:2px solid var(--ink);display:none}
+
+/* ===== окна ===== */
+.modal{position:fixed;inset:0;background:rgba(15,17,38,.72);display:none;align-items:flex-end;justify-content:center;z-index:100}
+.modal.show{display:flex}
+.sheet{width:100%;max-width:480px;max-height:90vh;overflow-y:auto;background:var(--paper);border:3px solid var(--ink);border-bottom:0;border-radius:26px 26px 0 0;padding:20px 16px calc(18px + env(safe-area-inset-bottom));animation:slide .28s cubic-bezier(.2,.9,.3,1.15);scrollbar-width:none}
+@keyframes slide{from{transform:translateY(60px);opacity:0}}
+.sheet .emo{font-size:52px;text-align:center;line-height:1.1}
+.sheet h2{font-family:var(--dp);font-size:20px;font-weight:800;text-align:center;margin:8px 0 6px;line-height:1.25}
+.sheet p.c{text-align:center;color:var(--mu);margin:0 0 14px;font-weight:700}
+.sheet .big-btn+.big-btn{margin-top:10px}
+.step-lbl{font-size:12px;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.pick{background:var(--paper2);border:2px solid var(--ink);border-radius:16px;padding:10px 6px;text-align:center;font-weight:800;font-size:12.5px;position:relative;box-shadow:0 3px 0 var(--ink);line-height:1.2}
+.pick .e{font-size:26px;display:block;margin-bottom:3px}
+.pick small{display:block;font-size:11px;color:var(--mu);font-weight:700;margin-top:2px}
+.pick.on{background:var(--lime)}
+.pick.lock{opacity:.4}
+.pick .fit{position:absolute;top:-8px;right:-6px;font-size:11px;background:var(--yel);border:2px solid var(--ink);border-radius:99px;padding:0 6px}
+.choice{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--paper2);border:3px solid var(--ink);border-radius:18px;padding:12px 14px;box-shadow:0 4px 0 var(--ink);margin-bottom:10px}
+.choice:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.choice .e{font-size:30px}
+.choice b{display:block;font-size:15px}
+.choice small{color:var(--mu);font-weight:700;font-size:12.5px}
+.choice.best{background:#e9f8c6}
+.tipline{background:#fff1b8;border:2px solid var(--ink);border-radius:14px;padding:9px 12px;font-size:13.5px;margin-bottom:12px}
+.review{display:flex;align-items:center;gap:10px;background:var(--paper2);border:2px solid var(--ink);border-radius:16px;padding:10px 12px;margin-bottom:8px;animation:pop2 .35s cubic-bezier(.2,.9,.3,1.4) both}
+@keyframes pop2{from{transform:scale(.7);opacity:0}}
+.review .score{font-family:var(--dp);font-size:22px;font-weight:800;width:46px;height:46px;border-radius:12px;border:2px solid var(--ink);display:grid;place-items:center;flex:none}
+.review .who{font-weight:800}
+.review .q{font-size:13px;color:var(--mu);font-weight:700}
+.avg{font-family:var(--dp);font-size:44px;font-weight:800;text-align:center;margin:4px 0}
+.table{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0 12px}
+.table td{padding:5px 0;border-bottom:2px dashed #e0d8c6}.table td:last-child{text-align:right;font-weight:800}
+.rank-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px}
+.rank-row.me{background:var(--lime);border:2px solid var(--ink)}
+.rank-row .n{font-family:var(--dp);width:28px;font-weight:800}
+.toast{pointer-events:none;position:fixed;top:calc(10px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:130;background:var(--paper);border:3px solid var(--ink);box-shadow:0 4px 0 var(--ink);border-radius:16px;padding:9px 14px;font-size:13.5px;font-weight:800;display:none;max-width:92%;text-align:center}
+.toast.show{display:block;animation:fade .2s}
+.blocked{position:fixed;inset:0;background:var(--bg);color:#fff;display:none;place-items:center;text-align:center;padding:30px;z-index:300}
+
+/* обучение */
+.coach{position:fixed;inset:0;z-index:110;pointer-events:none;display:none}
+.coach.show{display:block}
+.spot{position:fixed;border-radius:20px;box-shadow:0 0 0 9999px rgba(15,17,38,.78);transition:all .3s cubic-bezier(.2,.9,.3,1);outline:3px solid var(--yel);outline-offset:3px}
+.spot.pulse{animation:sp 1.3s infinite}
+@keyframes sp{50%{outline-offset:9px}}
+.tip{position:fixed;left:12px;right:12px;max-width:456px;margin:0 auto;background:var(--paper);border:3px solid var(--ink);box-shadow:0 5px 0 var(--ink);border-radius:20px;padding:14px 16px;pointer-events:auto;transition:top .3s}
+.tip .st{font-size:11px;font-weight:800;color:#4e7d17;letter-spacing:.06em;text-transform:uppercase}
+.tip h4{margin:3px 0;font-family:var(--dp);font-size:15px;font-weight:800}
+.tip p{margin:0;font-size:13.5px;font-weight:700;color:#3d3a4d}
+.tip .r{display:flex;gap:8px;margin-top:10px;align-items:center}
+.tip .nx{background:var(--lime);border:2px solid var(--ink);box-shadow:0 3px 0 var(--ink);border-radius:12px;padding:8px 14px;font-weight:800;font-size:13px}
+.tip .sk{color:var(--mu);font-size:12px;font-weight:800;margin-left:auto;padding:6px}
+.tip .wt{font-size:13px;font-weight:800;color:#4e7d17}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="hud">
+    <div class="hud-row">
+      <div class="cash-wrap" id="cashwrap"><div class="cash" id="cash">0 ₽</div></div>
+      <button class="course-btn" id="course-btn">🎓 <span>Курс<small>в жизни</small></span></button>
+      <button class="iconbtn" id="settings-btn" title="Настройки">⚙️</button>
+    </div>
+    <div class="hud-row" style="margin-top:8px"><div class="speed" id="speed"><button data-sp="0">⏸</button><button data-sp="1" class="on">▶</button><button data-sp="3">⏩</button></div><div class="chips" id="chips"></div></div>
+    <div class="bills" id="bills"><span id="bills-t"></span><div class="trk"><i id="bills-bar"></i></div></div>
+  </header>
+
+  <main class="screens">
+    <section class="screen active" id="home">
+      <div class="studio" id="studio"><canvas id="cv" width="128" height="78"></canvas><div class="sign" id="sign"></div></div>
+      <div id="status"></div>
+    </section>
+    <section class="screen" id="products">
+      <div class="title">Продукты</div><p class="lead">Всё, что ты выпустил. Продажи идут 12 недель и постепенно затухают</p>
+      <div id="prod-list"></div>
+      <div class="title">Рейтинг студий</div><p class="lead">По заработку за всё время. Раз в сезон вручают премию «Золотой промт»</p>
+      <div class="panel" id="rating"></div>
+    </section>
+    <section class="screen" id="team">
+      <div class="title">Команда</div><p class="lead" id="team-lead"></p>
+      <div id="workers"></div>
+      <div id="cands"></div>
+      <div class="title">Офис</div><p class="lead">Больше мест, больше людей. Аренда списывается раз в месяц</p>
+      <div id="offices"></div>
+      <div class="title">Нейросети</div><p class="lead">Подписки усиливают всю команду. Цена за человека в месяц</p>
+      <div id="tools"></div>
+    </section>
+    <section class="screen" id="lab">
+      <div class="title">Исследования</div><p class="lead">Очки науки 🔬 команда копит во время работы. Тратишь их на новые возможности</p>
+      <div id="research"></div>
+    </section>
+  </main>
+
+  <nav class="nav" id="nav">
+    <button class="active" data-tab="home"><span>🏠</span>Студия</button>
+    <button data-tab="products"><span>📦</span>Продукты</button>
+    <button data-tab="team"><span>👥</span>Команда<i class="dot" id="dot-team"></i></button>
+    <button data-tab="lab"><span>🔬</span>Наука<i class="dot" id="dot-lab"></i></button>
+  </nav>
+</div>
+<div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
+<div class="coach" id="coach"><div class="spot" id="spot"></div><div class="tip" id="tip"></div></div>
+<div class="toast" id="toast"></div>
+<div class="blocked" id="blocked"><div><div style="font-size:56px">🚫</div><h3>Доступ закрыт</h3><p>Администратор ограничил доступ к игре.</p></div></div>
+
+<script>
+// ===================== НАСТРОЙКИ =====================
+const API_URL = "https://bndk-bilal443.amvera.io";
+const CONTACT = "https://t.me/styllec";
+const COURSE_URL = "https://bilal1803.github.io/kurs/buy.html";
+const TARIFFS = [
+  {id:"start",name:"Старт",price:2990,desc:"Нейросети, дизайн, сайты и боты. 38 уроков, шаблоны и промты."},
+  {id:"earn",name:"Заработок",price:5990,desc:"Всё из «Старта» и поиск клиентов: Авито, переписка, бриф, оферта.",hot:true},
+  {id:"mentor",name:"Наставник",price:11990,desc:"Все уроки и личный наставник до первых денег."},
+];
+const DAY_MS = 2500, MONTH = 28, SEASON = 84;
+
+// ===================== ДАННЫЕ =====================
+const NICHES = {
+  coffee:{name:"Кофейни",ico:"☕",short:"Кофе"}, barber:{name:"Барбершопы",ico:"💈",short:"Барбер"},
+  wb:{name:"Селлеры WB",ico:"📦",short:"Селлер"}, beauty:{name:"Салоны красоты",ico:"💅",short:"Бьюти"},
+  dental:{name:"Стоматологии",ico:"🦷",short:"Зубо",rp:8}, fitness:{name:"Фитнес-клубы",ico:"💪",short:"Фит",rp:8},
+  school:{name:"Онлайн-школы",ico:"🎓",short:"Уроко",rp:10}, auto:{name:"Автосервисы",ico:"🔧",short:"Авто",rp:10},
+  food:{name:"Доставка еды",ico:"🍕",short:"Еда",rp:12}, realty:{name:"Недвижимость",ico:"🏠",short:"Хата",rp:12},
+  law:{name:"Юристы",ico:"⚖️",short:"Юр",rp:15}, crypto:{name:"Криптоинвесторы",ico:"🪙",short:"Крипто",rp:20},
+};
+// d: доля дизайна в идеале, best: правильный выбор в каждой из 3 фаз
+const TYPES = {
+  landing:{name:"Сайт",ico:"🖥",word:"Сайт",d:.65,best:[0,2,1],base:10000,rp:0},
+  bot:    {name:"Telegram-бот",ico:"🤖",word:"Бот",d:.3,best:[1,0,2],base:14000,rp:0},
+  miniapp:{name:"Мини-приложение",ico:"📱",word:"Апп",d:.55,best:[0,1,0],base:20000,rp:25},
+  crm:    {name:"CRM",ico:"📊",word:"CRM",d:.25,best:[1,2,2],base:28000,rp:40},
+  ai:     {name:"AI-ассистент",ico:"🦾",word:"ИИ",d:.4,best:[2,0,1],base:40000,rp:60},
+  app:    {name:"Мобильное приложение",ico:"📲",word:"Мобайл",d:.5,best:[0,1,1],base:60000,rp:90},
+};
+// совместимость ниши и типа: 3 хит, 2 хорошо, 1 нормально, 0 провал
+const FIT = {
+  coffee:{landing:3,bot:2,miniapp:3,crm:0,ai:1,app:2}, barber:{landing:2,bot:3,miniapp:2,crm:1,ai:1,app:1},
+  wb:{landing:0,bot:2,miniapp:1,crm:2,ai:3,app:1}, beauty:{landing:2,bot:3,miniapp:2,crm:1,ai:1,app:2},
+  dental:{landing:2,bot:2,miniapp:1,crm:3,ai:1,app:1}, fitness:{landing:1,bot:2,miniapp:3,crm:1,ai:2,app:3},
+  school:{landing:2,bot:3,miniapp:2,crm:1,ai:3,app:1}, auto:{landing:1,bot:2,miniapp:1,crm:3,ai:0,app:1},
+  food:{landing:1,bot:2,miniapp:3,crm:1,ai:1,app:3}, realty:{landing:3,bot:1,miniapp:1,crm:2,ai:2,app:1},
+  law:{landing:2,bot:1,miniapp:0,crm:2,ai:3,app:0}, crypto:{landing:1,bot:3,miniapp:2,crm:0,ai:3,app:2},
+};
+const FIT_MULT=[.55,.8,1,1.15];
+const SIZES = {
+  s:{name:"Маленький",ico:"🐣",days:12,cost:8000,mult:1,crew:1},
+  m:{name:"Средний",ico:"🐥",days:22,cost:50000,mult:2.5,crew:2,rp:30},
+  l:{name:"Большой",ico:"🦅",days:36,cost:250000,mult:6,crew:4,rp:90},
+};
+// три фазы, в каждой выбор из трёх. d/t/b: множители очков дизайна, кода и багов, h: хайп
+const PHASES = [
+  {name:"Прототип",opts:[
+    {ico:"🎨",name:"Красивый дизайн",hint:"Сначала картинка, потом смысл",d:1.4,t:.7},
+    {ico:"🧠",name:"Умная логика",hint:"Схемы, стрелочки, кофе",d:.7,t:1.4},
+    {ico:"✍️",name:"Продающие тексты",hint:"«Только сегодня, только для вас»",d:1.15,t:.85}]},
+  {name:"Разработка",opts:[
+    {ico:"🔌",name:"Интеграции",hint:"Подключить всё ко всему",d:.8,t:1.3,b:1.1},
+    {ico:"⚡",name:"Скорость",hint:"Грузится быстрее, чем ты моргнёшь",d:.9,t:1.2,b:1.3},
+    {ico:"🛡",name:"Надёжность",hint:"Чтобы не падало в пятницу вечером",d:.9,t:1.05,b:.6}]},
+  {name:"Запуск",opts:[
+    {ico:"📣",name:"Реклама",hint:"Рилсы, блогеры, баннер на Арбате",d:1,t:1,h:1.35},
+    {ico:"⭐",name:"Бета-тест на друзьях",hint:"Друзья скажут правду. Наверное",d:1.2,t:.9,b:.8},
+    {ico:"🧪",name:"Ловля багов",hint:"Тестировщик с лупой",d:.85,t:1.1,b:.35}]},
+];
+const RESEARCH = [
+  {id:"design",ico:"🎨",name:"Дизайн с нейросетями",rp:15,desc:"Можно брать дизайн-заказы, +2 к дизайну",need:()=>!S.can.design},
+  {id:"clients",ico:"📨",name:"Поиск клиентов",rp:20,desc:"Заказы начнут приходить сами (Авито 1 500 ₽ в месяц)",need:()=>!S.can.flow},
+  {id:"hire",  ico:"👥",name:"Первый сотрудник",rp:12,desc:"Можно нанимать людей"},
+  {id:"report",ico:"🔍",name:"Аналитика рынка",rp:15,desc:"Перед стартом видно, подходит ли ниша к типу"},
+  {id:"beta",  ico:"🧪",name:"Автотесты",rp:20,desc:"Багов на 30% меньше"},
+  {id:"mkt",   ico:"📣",name:"Маркетинг",rp:25,desc:"Продажи на 20% выше"},
+  {id:"size_m",ico:"🐥",name:"Средние проекты",rp:30,desc:"Дороже, дольше, но продажи ×3"},
+  {id:"type_miniapp",ico:"📱",name:"Мини-приложения",rp:25,desc:"Новый тип продукта"},
+  {id:"type_crm",ico:"📊",name:"CRM-системы",rp:40,desc:"Новый тип продукта"},
+  {id:"type_ai",ico:"🦾",name:"AI-ассистенты",rp:60,desc:"Новый тип продукта"},
+  {id:"size_l",ico:"🦅",name:"Большие проекты",rp:90,desc:"Продажи ×10, нужна команда от 4 человек"},
+  {id:"type_app",ico:"📲",name:"Мобильные приложения",rp:90,desc:"Новый тип продукта"},
+  {id:"ownai", ico:"🧬",name:"Своя нейросеть",rp:140,desc:"Вся команда +1 ко всем навыкам"},
+];
+const TOOLS = [
+  {id:"gpt",ico:"💬",name:"ChatGPT Plus",cost:2000,desc:"+10% ко всем очкам",d:.1,t:.1},
+  {id:"mj",ico:"🖼",name:"Midjourney",cost:2500,desc:"+20% к дизайну",d:.2,t:0},
+  {id:"cursor",ico:"⌨️",name:"Cursor",cost:2000,desc:"+20% к коду",d:0,t:.2},
+];
+const OFFICES = [
+  {id:"flat",name:"Квартира",ico:"🛋",desks:1,rent:0,move:0},
+  {id:"garage",name:"Гараж-студия",ico:"🏚",desks:3,rent:15000,move:20000},
+  {id:"office",name:"Офис",ico:"🏢",desks:6,rent:55000,move:150000},
+];
+const LIFE = 10000;
+// стартовое обучение: от тарифа зависит, с чем начинаешь
+const START_MONEY = 20000;
+const TIERS = {
+  start: {name:"Старт",ico:"🌱",price:2990,bar:42,d:1,t:3,r:1,design:false,flow:false,pay:1,every:0,avito:false,
+    pros:["Сайты и Telegram-боты"],cons:["Дизайн не умеешь: карточки и логотипы не берёшь","Заказы не приходят, ищешь сам"]},
+  earn:  {name:"Заработок",ico:"💼",price:5990,bar:55,d:3,t:3,r:2,design:true,flow:true,pay:1,every:7,avito:true,
+    pros:["Сайты, боты и дизайн","Заказы приходят сами: Авито и сарафан"],cons:["Авито стоит 1 500 ₽ в месяц"]},
+  mentor:{name:"Наставник",ico:"🚀",price:11990,bar:110,d:7,t:7,r:4,design:true,flow:true,pay:1.35,every:5,avito:true,
+    pros:["Всё из «Заработка»","Заказы чаще и дороже на 35%","+10 к навыкам на старте"],cons:["Денег на старте меньше всех"]},
+};
+const AVITO_COST = 1500;
+const RIVALS = [["ИП Нейросеткин",60e3],["Вайб и сыновья",140e3],["Ctrl+C Ctrl+V Studio",300e3],["Бот-Ферма",650e3],["Нейро-Шаурма",1.3e6],["Студия «Сделаем вчера»",2.6e6],["Кодеры с Патриков",5e6],["ООО «ПромтСтрой»",9e6],["Digital-кот Барсик",18e6]];
+const OUTLETS = [["VC.ру","📰"],["Хабр","🧑‍💻"],["Пикабу","🍑"],["Тётя Галя","👵"]];
+// общие фразы по оценке (без упоминания типа продукта)
+const QUOTES = {
+  10:["Шедевр. Плакал от счастья","Лучшее, что я видел с тех пор, как вышел ChatGPT","Поставил бы 11, но шкала не даёт","Отменил отпуск, чтобы этим пользоваться","Вайб-кодинг уровня бог"],
+  9:["Купил бы дважды","Конкуренты из Сити нервно курят","Почти идеально. Почти","Показал маме, мама хочет такое же","Уровень, за который не стыдно"],
+  8:["Крепко. Есть душа и почти нет багов","Пользуюсь каждый день, даже по выходным","Видно руку мастера","Сделано с любовью и немного с ChatGPT"],
+  7:["Добротно. Работает с первого раза. Почти","Твёрдая семёрка, как за поведение","Нравится, но хочется большего","Хорошо, но без огонька"],
+  6:["Ну такое. Видно, что промтили в метро","Нормально, если не присматриваться","Шесть из десяти, как погода в Питере","Идея есть, исполнения не завезли"],
+  5:["Нейросеть старалась, люди не очень","Середнячок, как пельмени из ларька","Открыл, закрыл, забыл","Сделано на отвали, но с любовью"],
+  4:["Кажется, это делали ночью и без кофе","Багов больше, чем пикселей","Половина кнопок ведёт в никуда","Сначала было смешно, потом грустно"],
+  3:["Похоже на дипломный проект 2009 года","Мой роутер обиделся","Это единственное, что сегодня меня расстроило","Хотелось как лучше, получилось как всегда"],
+  2:["Удалил и почистил историю браузера","Это что, пранк?","Даже нейросеть отказалась это комментировать","Верните интернет, каким он был"],
+  1:["Мой кот сделал бы лучше","Верните мне мои 5 минут","Это не продукт, это крик о помощи","Ноль, но ниже нельзя"],
+};
+// фразы про конкретный тип продукта: hi 8–10, mid 5–7, lo 1–4
+const TYPE_QUOTES = {
+  landing:{hi:["Сайт грузится быстрее, чем я моргаю","Заявки с сайта пошли в первый же день","Наконец сайт, где кнопка «Позвонить» реально звонит","Листал сайт просто ради удовольствия"],
+    mid:["Сайт красивый, но меню прячется, как кот под диваном","На телефоне всё разъехалось, на компе норм","Сайт как сайт. Тильда бы тоже смогла","Фото красивые, текстов мало"],
+    lo:["Сайт открылся только с третьего раза","Кнопка «Купить» убежала вместе с моими деньгами","На главной написано «Lorem ipsum». Это вообще что?","Сайт загрузился. Это единственный плюс"]},
+  bot:{hi:["Бот ответил быстрее, чем мой менеджер","Записался через бота за 10 секунд, даже не проснувшись","Бот вежливее моей тёщи","Бот сам напомнил о записи. Я чуть не прослезился"],
+    mid:["Бот нормальный, но на «привет» отвечает прайсом","Иногда бот задумывается, как философ","Работает, но кнопки в боте как в 2015-м","Бот понял меня с третьего раза"],
+    lo:["Бот назвал меня Валерой. Я Ольга","Бот отправил мне 47 сообщений подряд","На вопрос «сколько стоит» бот прислал стикер с котом","Бот ушёл в бесконечный цикл и, кажется, обрёл сознание"]},
+  miniapp:{hi:["Мини-приложение прямо в Telegram, и всё летает","Заказал, оплатил и не вышел из чата. Магия","Удобнее, чем отдельное приложение","Открывается мгновенно, даже в метро"],
+    mid:["Удобно, но иногда зависает на оплате","Красиво, но шрифт как в аптечном чеке","Работает, если не нажимать слишком быстро","Неплохо, но хочется тёмную тему"],
+    lo:["Мини-приложение открылось белым экраном и замолчало","Корзина обнулилась три раза","Кнопка «Оплатить» есть, оплаты нет","Telegram предложил закрыть это от греха подальше"]},
+  crm:{hi:["CRM навела порядок, о котором я мечтал с 2012 года","Менеджеры перестали терять клиентов. Совсем","Отчёты строятся сами. Бухгалтер в шоке","Наконец не Excel на 400 вкладок"],
+    mid:["CRM удобная, но разобраться заняло неделю","Работает, но кнопок как в самолёте","Половину функций никто не понял","Норм, но экспорт в Excel всё равно нужен"],
+    lo:["CRM потеряла всех клиентов. Вообще всех","Менеджеры вернулись к блокнотам","Отчёт за месяц показал −3 клиента","Пароль от CRM сбрасывается каждый час"]},
+  ai:{hi:["Ассистент отвечает умнее, чем я сам","AI закрывает заявки, пока я сплю","Ассистент пошутил так, что засмеялся весь офис","Как сотрудник, который не просит отпуск"],
+    mid:["Умный, но иногда уверенно несёт чушь","Ответы хорошие, но слишком длинные","Работает, пока не спросишь про скидки","Иногда отвечает на английском. Без причины"],
+    lo:["AI-ассистент посоветовал клиенту идти к конкурентам","Ассистент придумал товар, которого у нас нет","На вопрос «как дела» ответил стихами","Галлюцинирует чаще, чем отвечает"]},
+  app:{hi:["Приложение в топе App Store нашего района","Красиво, быстро, без лишнего","Уведомления по делу, а не каждые 5 минут","Поставил на главный экран, рядом с банком"],
+    mid:["Приложение норм, но весит как игра","Иногда вылетает, но быстро открывается","Красиво, но батарею ест как не в себя","Хорошо, но регистрация на 12 шагов"],
+    lo:["Приложение вылетает при запуске. Стабильно","Скачал, открыл, телефон нагрелся","Удалил, чтобы освободить место под фото кота","Звёзды в сторе ставят только родственники"]},
+};
+// фразы про нишу
+const NICHE_QUOTES = {
+  coffee:{hi:"Теперь заказываю латте, не вставая с кровати",lo:"Заказал кофе, а пришла инструкция к кофемашине"},
+  barber:{hi:"Записался к мастеру за минуту, борода довольна",lo:"Записали на стрижку в 3 часа ночи"},
+  wb:{hi:"Карточки продают лучше, чем я сам",lo:"Товар показали вверх ногами"},
+  beauty:{hi:"Мастер маникюра теперь не сидит без записей",lo:"Записали сразу к трём мастерам одновременно"},
+  dental:{hi:"Записался к стоматологу и даже не испугался",lo:"Перепутали «чистку» и «удаление». Хорошо, что только в форме"},
+  fitness:{hi:"Начал ходить в зал. Спасибо, что не дали отвертеться",lo:"Купил абонемент, а меня отправили в бассейн, которого нет"},
+  school:{hi:"Ученики сдают домашку вовремя. Чудо",lo:"Урок начался в 4 утра по Москве"},
+  auto:{hi:"Мастер позвонил ровно в срок, машина как новая",lo:"Записали на шиномонтаж велосипеда"},
+  food:{hi:"Пицца приехала раньше, чем я проголодался",lo:"Заказал роллы, получил борщ. Вкусный, но"},
+  realty:{hi:"Нашёл квартиру за вечер, риелтор в шоке",lo:"Показали квартиру, которую продали в 2019-м"},
+  law:{hi:"Юрист ответил в чате быстрее, чем я испугался",lo:"Договор составлен на языке эльфов"},
+  crypto:{hi:"Курс вырос, и мы радовались вместе",lo:"Всё продали на минимуме. Спасибо"},
+};
+const GALYA = {
+  hi:["Внучок, очень красиво, я подругам переслала","Нажала, и оно само всё сделало. Чудеса","Теперь я продвинутая бабушка","Показала соседке, она обзавидовалась"],
+  mid:["Хорошо, но шрифт мелкий, очки не помогают","Позвонила внуку, он сказал, что нормально","Кнопочки красивые, но зачем их столько","Разобралась сама, но с валидолом"],
+  lo:["Ничего не поняла, но очень интересно","Где тут кнопка «интернет»?","Нажала куда-то, и пропал телевизор","Внучок, оно опять что-то хочет"],
+};
+const band = s=>s>=8?"hi":s>=5?"mid":"lo";
+// выбираем фразу рецензента: про тип продукта, про нишу или общую, без повторов
+function reviewQuote(s,type,niche,used){
+  const b=band(s), pools=[];
+  pools.push(...Array(5).fill(TYPE_QUOTES[type]?.[b]||[]));
+  if(b!=="mid"&&NICHE_QUOTES[niche]) pools.push(...Array(2).fill([NICHE_QUOTES[niche][b]]));
+  pools.push(...Array(4).fill(QUOTES[s]));
+  for(let k=0;k<12;k++){ const pool=pick(pools), q=pick(pool); if(q&&!used.has(q)){ used.add(q); return q; } }
+  return pick(QUOTES[s]);
+}
+const SAY_WORK = ["Промт: «сделай красиво»","Нейросеть, не тупи","Это не баг, это фича","Кто трогал прод?","Ещё одна правка и всё","Почему это работает?","Почему это НЕ работает?","Пишу ТЗ для ТЗ","Нужен кофе. Срочно","Сделал за 5 минут, объяснял 3 часа","Claude, родной, выручай","Ctrl+Z, Ctrl+Z, Ctrl+Z","Деплой в пятницу? Легко","Где мой сырник?"];
+const SAY_IDLE = ["Скучно…","Может, новый проект?","Листаю рилсы про вайб-кодинг","Я бы сейчас что-нибудь задеплоил","Пора на дело, шеф"];
+const NAMES = ["Тимур","Алина","Санжар","Карина","Артём","Мадина","Ерлан","Вика","Данияр","Полина","Руслан","Дина","Ильяс","Аружан","Макс","Лейла"];
+const LOOKS = {hair:["#2b1d14","#6b3e1f","#e2b04a","#c0392b","#1d1d1d","#ff7eb6","#5ee7ff"],skin:["#f6cfae","#e0a87e","#b97a50","#ffe1c8"],shirt:["#B8E351","#5ee7ff","#ff7eb6","#ffd84d","#b48cff","#ff9f43","#ffffff"]};
+const CLIENTS = ["Кофейня «Зерно»","Барбершоп «Борода»","Клиника «Улыбка»","Шиномонтаж 24","Цветы у Ашота","Фитнес «Пульс»","Пекарня «Булка»","Школа английского","Салон «Лайм»","Тётя Галя"];
+
+// ===================== СОСТОЯНИЕ =====================
+const KEY = "vibecoder_studio_v5";
+if(new URLSearchParams(location.search).has("reset")){ localStorage.removeItem(KEY); history.replaceState(null,"",location.pathname); }
+const tg = window.Telegram?.WebApp;
+const WAS_FRESH = !localStorage.getItem(KEY);
+const rnd=(a,b)=>a+Math.random()*(b-a), pick=a=>a[Math.floor(Math.random()*a.length)], clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const look=()=>({hair:pick(LOOKS.hair),skin:pick(LOOKS.skin),shirt:pick(LOOKS.shirt)});
+let resetting=false;
+function newGame(){
+  return { studio:"", player:"", tier:null, can:{design:false,flow:false}, search:null, money:START_MONEY, day:1, fans:0, rp:0, best:62, earned:0, debt:0, uid:1,
+    workers:[{id:0,name:"Ты",me:true,look:{hair:"#2b1d14",skin:"#f6cfae",shirt:"#B8E351"},d:3,t:3,r:2,salary:0,train:null}],
+    job:null, products:[], contracts:[], nextContracts:1, cands:[], research:{}, niches:{coffee:1,barber:1,wb:1,beauty:1}, types:{landing:1,bot:1}, sizes:{s:1},
+    tools:{gpt:true}, office:"flat", known:{}, fitKnown:{}, rivals:RIVALS.map(([n,r])=>({name:n,rev:r,g:rnd(.03,.07)})),
+    nextEvent:16, season:{best:0,start:1}, awards:[], hype:1, investor:false, flags:{}, tutorial:false, over:false, stats:{released:0,contracts:0} };
+}
+let S=(()=>{ try{ const s=JSON.parse(localStorage.getItem(KEY)); return s&&s.workers&&("tier" in s)?s:newGame(); }catch{ return newGame(); } })();
+const save=()=>{ if(!resetting) localStorage.setItem(KEY,JSON.stringify(S)); };
+const uid=()=>S.uid++;
+
+// ===================== РАСЧЁТЫ =====================
+const $=id=>document.getElementById(id);
+function fmt(n){ const s=n<0?"−":""; n=Math.abs(Math.floor(n));
+  for(const [v,u] of [[1e9,"млрд"],[1e6,"млн"],[1e4,"тыс"]]) if(n>=v){ const d=v===1e4?1e3:v; return s+(n/d).toFixed(n/d<100?1:0).replace(/\.0$/,"").replace(".",",")+" "+u; }
+  return s+n.toLocaleString("ru-RU"); }
+const month=()=>Math.floor((S.day-1)/MONTH)+1, dim=()=>((S.day-1)%MONTH)+1;
+const office=()=>OFFICES.find(o=>o.id===S.office);
+const toolMult=k=>1+TOOLS.reduce((a,t)=>a+(S.tools[t.id]?t[k]:0),0);
+const ownAI=()=>S.research.ownai?1:0;
+const avail=()=>S.workers.filter(w=>!w.train);
+function monthlyCost(){
+  const seats=S.workers.length, tools=TOOLS.reduce((a,t)=>a+(S.tools[t.id]?t.cost*seats:0),0), sal=S.workers.reduce((a,w)=>a+w.salary,0), rent=office().rent;
+  const ch=S.can.flow?AVITO_COST:0;
+  return {life:LIFE,rent,salary:sal,tools,channels:ch,total:LIFE+rent+sal+tools+ch};
+}
+const weeklyIncome=()=>S.products.filter(p=>p.weeksLeft>0).reduce((a,p)=>a+p.weekly,0);
+function myRank(){ const all=[...S.rivals.map(r=>r.rev),S.earned].sort((a,b)=>b-a); return all.indexOf(S.earned)+1; }
+const fitStars=f=>["💀","😐","👍","🔥"][f];
+
+// ===================== ВРЕМЯ =====================
+let spd=1, acc=0, lastT=performance.now(), pending=[];
+const modalOpen=()=>$("modal").classList.contains("show");
+function tick(){
+  const now=performance.now(), dt=Math.min(800,now-lastT); lastT=now;
+  const paused=spd===0||modalOpen()||S.over||(tActive&&!TUT[tStep]?.run)||waitingPhase;
+  if(!paused){
+    const f=dt*spd/DAY_MS; acc+=f;
+    work(f);
+    while(acc>=1){ acc-=1; newDay(); if(modalOpen()) break; }
+  }
+  if(!modalOpen()&&pending.length&&!tActive) pending.shift()();
+  render();
+}
+// команда работает: очки дизайна, кода, науки и баги
+function work(f){
+  const j=S.job; if(!j) return;
+  let phase=null;
+  if(j.kind==="product"){ phase=PHASES[j.phase].opts[j.emph[j.phase]]; }
+  avail().forEach(w=>{
+    const d=(w.d+ownAI())*f*rnd(.7,1.3)*toolMult("d")*(phase?.d||1), t=(w.t+ownAI())*f*rnd(.7,1.3)*toolMult("t")*(phase?.t||1);
+    j.D+=d; j.T+=t; S.rp+=w.r*f*.36;
+    if(j.kind==="product"){ const b=f*.28*(1-Math.min(.85,w.t/14))*(phase?.b||1)*(S.research.beta?.7:1); j.bugs+=b; if(Math.random()<b*2.2) bubble(w.id,"b"); }
+    if(Math.random()<d*.9) bubble(w.id,"d"); if(Math.random()<t*.9) bubble(w.id,"t");
+  });
+  if(j.kind==="product"){
+    j.done+=f;
+    const per=j.days/3, ph=Math.min(2,Math.floor(j.done/per));
+    if(ph>j.phase&&j.done<j.days){ j.phase=ph; askPhase(); }
+    if(j.done>=j.days) release();
+  } else if(j.kind==="contract"){
+    if(j.D>=j.needD&&j.T>=j.needT) contractDone(true);
+  }
+}
+function newDay(){
+  S.day++;
+  // учёба сотрудников
+  S.workers.forEach(w=>{ if(w.train&&S.day>=w.train.until){ w[w.train.stat]+=1; toast(`🎓 ${w.name} прокачал ${w.train.stat==="d"?"дизайн":w.train.stat==="t"?"код":"науку"}`); w.train=null; } });
+  // продажи раз в неделю
+  if(S.day%7===0){ let inc=0;
+    S.products.forEach(p=>{ if(p.weeksLeft>0){ const m=p.weekly*(S.investor?.8:1); inc+=m; p.earned+=m; S.fans+=Math.round(m/150*(p.avg>=7?1:.2)); p.weekly*=.76; p.weeksLeft--; } });
+    if(inc>0){ S.money+=inc; S.earned+=inc; toast(`💸 Продажи за неделю: +${fmt(inc)} ₽`); }
+  }
+  // заказы на подработку
+  if(S.can.flow&&S.day>=S.nextContracts){ genContracts(4); S.nextContracts=S.day+(TIERS[S.tier]?.every||7); toast("📨 Пришли новые заказы"); }
+  // ручной поиск заказов
+  if(S.search&&S.day>=S.search.until){ const sr=S.search; S.search=null;
+    if(Math.random()<sr.chance){ const got=genContracts(sr.n,true); toast(`📨 Откликнулись: ${got} ${got===1?"заказ":"заказа"}`); } else toast("🦗 Никто не откликнулся. Попробуй ещё"); }
+  // контракт: срок
+  if(S.job?.kind==="contract"&&S.day>S.job.deadline) contractDone(false);
+  // соперники растут
+  if(dim()===1){ S.rivals.forEach(r=>r.rev*=1+r.g*rnd(.6,1.4)); }
+  // события
+  if(S.day>=S.nextEvent&&S.tutorial){ S.nextEvent=S.day+Math.round(rnd(10,17)); pending.push(showEvent); }
+  // сезон и премия
+  if((S.day-1)%SEASON===0&&S.day>1) pending.push(seasonAward);
+  if(dim()===1) monthEnd();
+  if(S.day%3===0) sync();
+  // топ-5 впервые: мягко про курс
+  if(!S.flags.top5&&myRank()<=5){ S.flags.top5=1; pending.push(()=>modal(`<div class="emo">🏆</div><h2>Ты в топ-5 студий!</h2><p class="c">Обошёл «${S.rivals.sort((a,b)=>a.rev-b.rev)[4]?.name||"конкурентов"}». Неплохо для студии из квартиры.</p><button class="big-btn" data-close>Ура</button><p class="c" style="margin:12px 0 0;font-size:12.5px">Кстати, так зарабатывают и в жизни. <a href="#" id="soft-course" style="color:#4e7d17">Как?</a></p>`)); }
+}
+function monthEnd(){
+  const c=monthlyCost(); S.money-=c.total;
+  if(S.money<0) S.debt++; else S.debt=0;
+  if(S.debt>=2) return bankrupt();
+  modal(`<div class="emo">🧾</div><h2>Счета за ${month()-1}-й месяц</h2>
+    <table class="table"><tr><td>Жизнь</td><td>−${fmt(c.life)} ₽</td></tr>${c.rent?`<tr><td>Аренда</td><td>−${fmt(c.rent)} ₽</td></tr>`:""}${c.salary?`<tr><td>Зарплаты</td><td>−${fmt(c.salary)} ₽</td></tr>`:""}${c.tools?`<tr><td>Нейросети</td><td>−${fmt(c.tools)} ₽</td></tr>`:""}${c.channels?`<tr><td>Авито</td><td>−${fmt(c.channels)} ₽</td></tr>`:""}
+    <tr><td><b>На счету</b></td><td style="color:${S.money<0?"var(--red)":"#4e7d17"}">${fmt(S.money)} ₽</td></tr></table>
+    ${S.money<0?`<div class="tipline">⚠️ Ты в минусе. Ещё один месяц в минусе, и студия закроется. Бери заказы, они дают быстрые деньги</div>`:""}
+    <button class="big-btn" data-close>Дальше</button>`);
+  save();
+}
+function bankrupt(){
+  S.over=true; save(); event("bankrupt",{day:S.day});
+  modal(`<div class="emo">💸</div><h2>Студия закрылась</h2><p class="c">Два месяца в минусе. Кот съел последний сырник, арендодатель забрал ноутбук.</p>
+    <table class="table"><tr><td>Продержался</td><td>${S.day} дн.</td></tr><tr><td>Выпустил продуктов</td><td>${S.stats.released}</td></tr><tr><td>Заработал всего</td><td>${fmt(S.earned)} ₽</td></tr></table>
+    <button class="big-btn" id="restart">Попробовать снова</button><p class="c" style="margin:12px 0 0;font-size:12.5px">В жизни студии тоже прогорают без клиентов. <a href="#" id="soft-course" style="color:#4e7d17">Как этого избежать</a></p>`);
+  $("restart").onclick=()=>{ const pl=S.player, st=S.studio; S=newGame(); S.player=pl; S.studio=st; S.workers[0].name=pl||"Ты"; S.tutorial=true; closeModal(); save(); chooseTier(); };
+}
+
+// ===================== НОВЫЙ ПРОДУКТ =====================
+let draft=null;
+function productName(n,t){ return `${NICHES[n].short}${TYPES[t].word} ${pick(["Pro","3000","Max","Lite","GPT","2.0","Turbo","Ультра","Плюс","Next"])}`; }
+function openNewProduct(){
+  if(S.job) return toast("Сначала закончи текущую работу");
+  draft=draft&&!draft.started?draft:{niche:null,type:null,size:"s",name:""};
+  const draw=()=>{
+    const fitShown=S.research.report&&draft.niche&&draft.type;
+    const f=draft.niche&&draft.type?FIT[draft.niche][draft.type]:null;
+    if(draft.niche&&draft.type&&!draft.name) draft.name=productName(draft.niche,draft.type);
+    const sz=SIZES[draft.size], can=draft.niche&&draft.type&&S.money>=sz.cost&&avail().length>=sz.crew;
+    $("sheet").innerHTML=`<h2>Новый продукт</h2>
+      ${tActive?`<div class="tipline">💡 Барбершопам нужна онлайн-запись, а это работа для бота. Попробуй «Барбершопы» и «Telegram-бот»</div>`:""}
+      <div class="step-lbl">1. Для кого</div>
+      <div class="grid3">${Object.entries(NICHES).map(([k,n])=>`<button class="pick ${draft.niche===k?"on":""} ${S.niches[k]?"":"lock"}" data-niche="${k}"><span class="e">${S.niches[k]?n.ico:"🔒"}</span>${n.name}${S.research.report&&draft.type&&S.niches[k]?`<span class="fit">${fitStars(FIT[k][draft.type])}</span>`:""}</button>`).join("")}</div>
+      <div class="step-lbl" style="margin-top:14px">2. Что делаем</div>
+      <div class="grid3">${Object.entries(TYPES).map(([k,t])=>`<button class="pick ${draft.type===k?"on":""} ${S.types[k]?"":"lock"}" data-type="${k}"><span class="e">${S.types[k]?t.ico:"🔒"}</span>${t.name}</button>`).join("")}</div>
+      <div class="step-lbl" style="margin-top:14px">3. Размер</div>
+      <div class="grid3">${Object.entries(SIZES).map(([k,z])=>`<button class="pick ${draft.size===k?"on":""} ${S.sizes[k]?"":"lock"}" data-size="${k}"><span class="e">${S.sizes[k]?z.ico:"🔒"}</span>${z.name}<small>${fmt(z.cost)} ₽ · ${z.days} дн.</small><small>от ${z.crew} чел.</small></button>`).join("")}</div>
+      ${draft.name?`<div class="panel" style="margin:14px 0 10px;padding:10px 12px"><div class="row"><div class="grow"><div class="sm">Название</div><b style="font-family:var(--dp)">${draft.name}</b></div><button class="mini-btn" data-reroll="1">🎲</button></div>${fitShown?`<div class="sm" style="margin-top:6px">Совместимость: ${fitStars(f)} ${["провал","так себе","хорошо","хит"][f]}</div>`:""}</div>`:""}
+      <button class="big-btn" id="np-go" ${can?"":"disabled"}>${!draft.niche||!draft.type?"Выбери нишу и тип":S.money<sz.cost?"Не хватает денег":avail().length<sz.crew?`Нужно ${sz.crew} чел. в команде`:`🚀 Начать за ${fmt(sz.cost)} ₽`}</button>`;
+  };
+  modal(""); draw(); coachEvent("np_open");
+  $("sheet").onclick=e=>{
+    const b=e.target.closest("button"); if(!b) return;
+    if(b.dataset.niche){ if(!S.niches[b.dataset.niche]) return toast("🔒 Открой нишу в «Науке»"); draft.niche=b.dataset.niche; draft.name=""; }
+    if(b.dataset.type){ if(!S.types[b.dataset.type]) return toast("🔒 Открой тип в «Науке»"); draft.type=b.dataset.type; draft.name=""; }
+    if(b.dataset.size){ if(!S.sizes[b.dataset.size]) return toast("🔒 Открой размер в «Науке»"); draft.size=b.dataset.size; }
+    if(b.dataset.reroll) draft.name=productName(draft.niche,draft.type);
+    if(b.id==="np-go") return startProduct();
+    haptic("light"); draw();
+  };
+}
+function startProduct(){
+  const sz=SIZES[draft.size];
+  S.money-=sz.cost;
+  S.job={kind:"product",name:draft.name,niche:draft.niche,type:draft.type,size:draft.size,days:sz.days,done:0,phase:0,emph:[null,null,null],D:0,T:0,bugs:0,hype:S.hype};
+  S.hype=1; draft=null; closeModal(); askPhase(); save();
+}
+let waitingPhase=false;
+function askPhase(){
+  const j=S.job, ph=PHASES[j.phase]; waitingPhase=true;
+  const known=S.known[j.type]||{};
+  modal(`<div class="step-lbl" style="text-align:center">Фаза ${j.phase+1} из 3</div><h2>${ph.name}: на чём делаем упор?</h2>
+    ${tActive&&j.phase===0?`<div class="tipline">💡 Для ботов главное логика: чтобы запись работала без сбоев</div>`:""}
+    ${ph.opts.map((o,i)=>`<button class="choice ${known[j.phase]===i?"best":""}" data-emph="${i}"><span class="e">${o.ico}</span><div class="grow"><b>${o.name}${known[j.phase]===i?" ✓":""}</b><small>${known[j.phase]===i?"Так раньше сработало лучше всего":o.hint}</small></div></button>`).join("")}`);
+  $("sheet").onclick=e=>{ const b=e.target.closest("[data-emph]"); if(!b) return;
+    j.emph[j.phase]=+b.dataset.emph; waitingPhase=false; closeModal(); haptic("success");
+    toast(`${ph.opts[+b.dataset.emph].ico} ${ph.name}: ${ph.opts[+b.dataset.emph].name.toLowerCase()}`); coachEvent("phase_chosen"); save(); };
+}
+function release(){
+  const j=S.job, T=TYPES[j.type], total=j.D+j.T;
+  const ratio=j.D/Math.max(1,total), ratioMult=1-Math.min(.4,Math.abs(ratio-T.d)*1.6);
+  const matches=j.emph.filter((e,i)=>e===T.best[i]).length, phaseMult=[.66,.82,.96,1.1][matches];
+  const fit=FIT[j.niche][j.type], fitMult=FIT_MULT[fit];
+  const bugMult=1-Math.min(.45,(j.bugs/Math.max(1,total))*3.2);
+  // рынок устаёт от повторов: та же ниша или тот же тип подряд
+  const prev=S.products[0], tired=(prev&&prev.type===j.type?.9:1)*(prev&&prev.niche===j.niche?.92:1);
+  const raw=total/j.days*10*ratioMult*phaseMult*fitMult*bugMult*tired;
+  // как в Game Dev Tycoon: оценка относительно твоего лучшего результата
+  const rel=raw/S.best;
+  const score=clamp(7.5+(rel-1)*9+rnd(-.4,.4),1,10);
+  S.best=Math.max(S.best*.995,raw);
+  const used=new Set();
+  const reviews=OUTLETS.map(([n,ico],i)=>{ const s=clamp(Math.round(score+rnd(-1.3,1.3)),1,10);
+    const q=i===3?pick(GALYA[band(s)]):reviewQuote(s,j.type,j.niche,used);
+    return {n,ico,s,q}; });
+  const avg=reviews.reduce((a,r)=>a+r.s,0)/4;
+  const weekly=1.25*T.base*SIZES[j.size].mult*Math.pow(avg/10,3)*(1+Math.sqrt(S.fans)/70)*j.hype*(j.emph[2]===0?1.3:1)*(S.research.mkt?1.2:1);
+  const p={id:uid(),name:j.name,niche:j.niche,type:j.type,size:j.size,avg,reviews,weekly,weeksLeft:12,earned:0,day:S.day};
+  S.products.unshift(p); S.stats.released++; S.job=null; if(S.research.hire) genCands();
+  S.season.best=Math.max(S.season.best,avg);
+  S.fitKnown[j.niche+j.type]=fit;
+  // разбор: открываем одну правильную фазу
+  const k=S.known[j.type]=S.known[j.type]||{};
+  const unknown=[0,1,2].filter(i=>k[i]===undefined);
+  let hint="";
+  if(unknown.length){ const i=pick(unknown); k[i]=T.best[i]; hint=`В фазе «${PHASES[i].name}» для типа «${T.name}» лучше всего «${PHASES[i].opts[T.best[i]].name}»${j.emph[i]===T.best[i]?". Ты угадал!":""}`; }
+  showReviews(p,{fit,matches,bugs:j.bugs/Math.max(1,total),ratio,T,hint,tired});
+  event("product_released",{avg:Math.round(avg*10)/10});
+}
+function showReviews(p,a){
+  const color=s=>s>=8?"var(--lime)":s>=5?"var(--yel)":"var(--red)";
+  const notes=[];
+  notes.push(`${fitStars(a.fit)} ${NICHES[p.niche].name} + ${TYPES[p.type].name}: ${["провал","так себе","хорошо","хит"][a.fit]}`);
+  notes.push(`🎯 Угадано фаз: ${a.matches} из 3`);
+  if(a.tired<1) notes.push("😴 Рынок устал: та же ниша или тип, что в прошлый раз");
+  notes.push(a.bugs>.12?"🐞 Много багов":a.bugs>.06?"🐞 Багов терпимо":"🐞 Почти без багов");
+  const dd=a.ratio-a.T.d; notes.push(Math.abs(dd)<.08?"⚖️ Дизайн и код в балансе":dd>0?"⚖️ Дизайна многовато, кода мало":"⚖️ Кода многовато, дизайна мало");
+  modal(`<div class="step-lbl" style="text-align:center">Релиз</div><h2>${p.name}</h2>
+    <div id="revs"></div><div id="rev-end" style="display:none">
+    <div class="avg" style="color:${p.avg>=8?"#4e7d17":p.avg>=5?"#b88a00":"var(--red)"}">${p.avg.toFixed(1).replace(".",",")}</div>
+    <p class="c">${p.avg>=9?"Это хит! Все говорят только о тебе":p.avg>=7?"Хороший релиз, фанаты довольны":p.avg>=5?"Средненько. Продажи будут скромные":"Провал. Продажи почти не пойдут"}</p>
+    <div class="panel" style="padding:10px 12px">${notes.map(n=>`<div class="sm" style="padding:3px 0">${n}</div>`).join("")}</div>
+    ${a.hint?`<div class="tipline">🔍 ${a.hint}</div>`:""}
+    <button class="big-btn" data-close>Дальше</button></div>`);
+  p.reviews.forEach((r,i)=>setTimeout(()=>{ if(!$("revs")) return;
+    $("revs").insertAdjacentHTML("beforeend",`<div class="review"><div class="score" style="background:${color(r.s)}">${r.s}</div><div class="grow"><div class="who">${r.ico} ${r.n}</div><div class="q">«${r.q}»</div></div></div>`); haptic("light");
+    if(i===3) setTimeout(()=>{ if($("rev-end")){ $("rev-end").style.display="block"; haptic(p.avg>=7?"success":"warning"); if(p.avg>=7) coins(); coachEvent("released"); } },500); },450+i*650));
+}
+
+// ===================== ЗАКАЗЫ =====================
+// каждый заказ: заказчик, задача и вид работы (d дизайн, t код, mix всё вместе)
+const JOBS = [
+  ["Кофейня «Зерно»","Меню с фотками, чтобы слюнки текли","d"],["Кофейня «Зерно»","Бот, который принимает заказы на вынос","mix"],["Кофейня «Зерно»","Подключить оплату к сайту","t"],
+  ["Барбершоп «Борода»","Логотип: борода, но брутальная","d"],["Барбершоп «Борода»","Бот записи, срочно, мастера простаивают","mix"],["Барбершоп «Борода»","Починить запись, всех записывает на 9:00","t"],
+  ["Клиника «Улыбка»","Сайт, чтобы пациенты не боялись","mix"],["Клиника «Улыбка»","Напоминания о приёме в WhatsApp","t"],["Клиника «Улыбка»","Иконки зубов для сайта, милые","d"],
+  ["Шиномонтаж 24","Лендинг «Переобуем за 15 минут»","mix"],["Шиномонтаж 24","Онлайн-очередь, чтобы не стояли на улице","t"],
+  ["Цветы у Ашота","Карточки букетов для Авито","d"],["Цветы у Ашота","Бот, который сам принимает заказы на 8 марта","mix"],["Цветы у Ашота","Перенести магазин с Тильды","t"],
+  ["Фитнес «Пульс»","Баннер «Похудей к лету» (уже осень)","d"],["Фитнес «Пульс»","Расписание тренировок в Telegram","t"],["Фитнес «Пульс»","Сайт с абонементами и оплатой","mix"],
+  ["Пекарня «Булка»","Упаковка для круассанов","d"],["Пекарня «Булка»","Лендинг к пятнице, у них открытие","mix"],
+  ["Школа английского","Бот, который проверяет домашку","t"],["Школа английского","Карточки слов в стиле мемов","d"],["Школа английского","Сайт с пробным уроком","mix"],
+  ["Салон «Лайм»","Прайс, но красивый","d"],["Салон «Лайм»","Бот записи к мастерам маникюра","mix"],["Салон «Лайм»","Починить бота, он отвечает клиентам матом","t"],
+  ["Тётя Галя","Сайт для кошки Принцессы","mix"],["Тётя Галя","Открытка на юбилей, с блёстками","d"],["Тётя Галя","Настроить ей Telegram. Опять","t"],
+  ["Селлер «Носки Opt»","10 карточек для Wildberries","d"],["Селлер «Носки Opt»","Выгрузка заказов в таблицу","t"],
+  ["Пиццерия «Тесто»","Бот доставки с отслеживанием курьера","mix"],["Пиццерия «Тесто»","Баннер «Две по цене одной»","d"],
+  ["Автосервис «Гараж»","CRM на минималках вместо тетрадки","t"],["Автосервис «Гараж»","Лендинг «Ремонт без сюрпризов»","mix"],
+  ["Юрист Аркадий","Сайт, чтобы выглядеть дорого","mix"],["Юрист Аркадий","Логотип с весами и солидностью","d"],
+  ["Риелтор Марина","Каталог квартир в Telegram","mix"],["Риелтор Марина","Обработать фото квартир, чтобы были светлее","d"],
+  ["Крипто-Вася","Бот с курсами монет","t"],["Крипто-Вася","Лендинг «Стань миллионером» (без гарантий)","mix"],
+  ["Детский сад «Солнышко»","Сайт для родителей с меню на неделю","mix"],["Детский сад «Солнышко»","Яркие иконки для групп","d"],
+  ["Стартап «УберДляКотов»","Прототип приложения за выходные","mix"],["Стартап «УберДляКотов»","Подключить карту и оплату","t"],
+  ["Блогер Даша","Оформление Telegram-канала","d"],["Блогер Даша","Бот, который выдаёт гайд за подписку","t"],
+];
+function genContracts(n=3,add=false){
+  const P=avail().reduce((a,w)=>a+w.d+w.t,0)||6, pm=TIERS[S.tier]?.pay||1;
+  // без повторов: ни в одной пачке, ни среди недавних
+  const taken=new Set([...(S.recentJobs||[]),...S.contracts.map(c=>c.what)]);
+  const pool=JOBS.filter(([c,w,k])=>(S.can.design||k!=="d")&&!taken.has(w)).sort(()=>Math.random()-.5);
+  const usedClients=new Set(S.contracts.map(c=>c.client));
+  const chosen=[];
+  for(const j of pool){ if(chosen.length>=n) break; if(usedClients.has(j[0])) continue; usedClients.add(j[0]); chosen.push(j); }
+  const list=chosen.map(([client,what,kind])=>{
+    const needD=Math.round(P*rnd(1.2,2.6)*(kind==="d"?1.6:kind==="t"?.4:1)), needT=Math.round(P*rnd(1.2,2.6)*(kind==="t"?1.6:kind==="d"?.4:1));
+    const days=Math.round((needD+needT)/P*rnd(.9,1.3))+1, pay=Math.round((needD+needT)*rnd(90,120)*pm/500)*500;
+    return {id:uid(),client,what,kind,needD,needT,days,pay,penalty:Math.round(pay*.5/500)*500};
+  });
+  S.recentJobs=[...(S.recentJobs||[]),...list.map(c=>c.what)].slice(-15);
+  S.contracts=add?[...S.contracts,...list].slice(-5):list; return list.length;
+}
+function openContracts(){
+  if(S.job) return toast("Сначала закончи текущую работу");
+  const sr=S.search, nextIn=S.can.flow?Math.max(0,S.nextContracts-S.day):null;
+  const searchBox=`<div class="panel" style="background:#fff7e0"><h3>🔎 Найти заказы самому</h3><div class="sm">${S.can.flow?`Новые заказы придут сами через ${nextIn} дн. Можно ускорить`:"С тарифом «Старт» заказы сами не приходят. Ищи их вручную"}</div>
+    ${sr?`<div class="tipline" style="margin:10px 0 0">⏳ Ждём откликов, ещё ${Math.max(0,sr.until-S.day)} дн.</div>`
+      :`<button class="big-btn alt" style="margin-top:10px;padding:11px" data-search="avito"><span>📢 Объявление на Авито · ${fmt(AVITO_COST)} ₽</span></button><div class="sm" style="text-align:center;margin-top:4px">через 2 дня, откликнутся с шансом 70%</div>
+      <button class="big-btn ghost" style="margin-top:10px;padding:11px" data-search="friends"><span>💬 Написать знакомым · бесплатно</span></button><div class="sm" style="text-align:center;margin-top:4px">через 4 дня, шанс 35%</div>`}</div>`;
+  modal(`<h2>Заказы</h2><p class="c">Быстрые деньги. Набери нужные очки до срока, иначе штраф</p>
+    ${tActive?`<div class="tipline">💡 Заказы спасают, когда денег мало. Сейчас вернись и сделай свой продукт</div>`:""}
+    ${S.contracts.map(c=>`<div class="panel" style="margin-bottom:10px"><div class="row"><div class="grow"><h3 style="font-size:14.5px">${c.what}</h3><div class="sm">${c.client} · срок ${c.days} дн.</div></div><div style="font-family:var(--dp);font-weight:800;color:#4e7d17;white-space:nowrap">${fmt(c.pay)} ₽</div></div>
+      <div class="pts"><span class="tag ${c.kind==="d"?"":c.kind==="t"?"":"good"}">${c.kind==="d"?"🎨 дизайн":c.kind==="t"?"💻 код":"🧩 всё вместе"}</span></div><div class="pts"><span class="pt d">🎨 ${c.needD}</span><span class="pt t">💻 ${c.needT}</span><span class="pt n">штраф ${fmt(c.penalty)} ₽</span></div>
+      <button class="big-btn alt" style="margin-top:10px;padding:11px" data-take="${c.id}">Взять</button></div>`).join("")}
+    ${S.contracts.length?"":`<div class="panel" style="text-align:center"><div style="font-size:34px">📭</div><h3>Заказов пока нет</h3></div>`}${searchBox}`);
+  $("sheet").onclick=e=>{ const sb=e.target.closest("[data-search]");
+    if(sb){ if(sb.dataset.search==="avito"){ if(S.money<AVITO_COST) return toast("Не хватает денег"); S.money-=AVITO_COST; S.search={until:S.day+2,chance:.7,n:2}; }
+      else S.search={until:S.day+4,chance:.35,n:1};
+      closeModal(); toast("🔎 Ищем клиентов…"); save(); return; }
+    const b=e.target.closest("[data-take]"); if(!b) return;
+    const c=S.contracts.find(x=>x.id===+b.dataset.take); S.contracts=S.contracts.filter(x=>x!==c);
+    S.job={kind:"contract",...c,D:0,T:0,deadline:S.day+c.days}; closeModal(); toast("📋 Заказ взят. Команда за работой"); save(); };
+}
+function contractDone(ok){
+  const j=S.job; S.job=null;
+  if(ok){ S.money+=j.pay; S.earned+=j.pay; S.stats.contracts++; S.fans+=Math.round(j.pay/400); coins(); toast(`✅ ${j.client} доволен: +${fmt(j.pay)} ₽`); haptic("success"); }
+  else { S.money-=j.penalty; toast(`❌ Не успели. ${j.client} выставил штраф ${fmt(j.penalty)} ₽`); haptic("error"); }
+  save();
+}
+
+// ===================== КОМАНДА, НАУКА =====================
+function genCands(){
+  const lvl=1+S.stats.released*.25+S.workers.length*.4;
+  S.cands=[0,1,2].map(()=>{ const role=pick(["d","t","r","u"]), b=()=>Math.round(rnd(1,2.5)+lvl*.6);
+    const w={id:uid(),name:pick(NAMES),look:look(),role,d:b(),t:b(),r:Math.round(rnd(1,2)+lvl*.3)};
+    if(role==="d") w.d+=2+Math.round(lvl*.5); if(role==="t") w.t+=2+Math.round(lvl*.5); if(role==="r") w.r+=3;
+    w.salary=Math.round((5000+Math.pow(w.d+w.t+w.r,1.75)*230)/1000)*1000; return w; });
+}
+function hire(id){
+  if(!S.research.hire) return toast("🔒 Исследуй «Первый сотрудник»");
+  if(S.workers.length>=office().desks) return toast("Нет свободного стола. Переезжай в офис побольше");
+  const c=S.cands.find(x=>x.id===id); S.cands=S.cands.filter(x=>x!==c);
+  S.workers.push({...c,salary:c.salary,train:null}); toast(`👋 ${c.name} в команде!`); haptic("success"); save();
+}
+function fire(id){ const w=S.workers.find(x=>x.id===id); if(!w||w.me) return;
+  modal(`<div class="emo">🥲</div><h2>Уволить ${w.name}?</h2><p class="c">Обратно уже не вернётся.</p><button class="big-btn pink" id="fire-yes">Уволить</button><button class="big-btn ghost" data-close>Оставить</button>`);
+  $("fire-yes").onclick=()=>{ S.workers=S.workers.filter(x=>x!==w); closeModal(); toast(`${w.name} ушёл. Забрал кружку`); save(); }; }
+function trainW(id,stat){ const w=S.workers.find(x=>x.id===id), cost=4000+(w[stat])*1500;
+  if(w.train) return; if(S.money<cost) return toast(`Нужно ${fmt(cost)} ₽`);
+  S.money-=cost; w.train={stat,until:S.day+5}; toast(`📚 ${w.name} на курсах 5 дней`); save(); }
+function doResearch(id){ const r=RESEARCH.find(x=>x.id===id);
+  if(S.research[id]) return; if(S.rp<r.rp) return toast(`Нужно ${r.rp} 🔬. Наука копится во время работы`);
+  S.rp-=r.rp; S.research[id]=1;
+  if(id.startsWith("type_")) S.types[id.slice(5)]=1;
+  if(id==="size_m") S.sizes.m=1; if(id==="size_l") S.sizes.l=1;
+  if(id==="hire") genCands();
+  if(id==="design"){ S.can.design=true; S.workers[0].d+=2; }
+  if(id==="clients"){ S.can.flow=true; S.nextContracts=S.day+1; }
+  modal(`<div class="emo">${r.ico}</div><h2>Открыто: ${r.name}</h2><p class="c">${r.desc}</p><button class="big-btn" data-close>Отлично</button>`);
+  coachEvent("researched"); save(); }
+function openNiche(k){ const n=NICHES[k]; if(S.niches[k]) return;
+  if(S.rp<n.rp) return toast(`Нужно ${n.rp} 🔬`);
+  S.rp-=n.rp; S.niches[k]=1; toast(`${n.ico} Новая ниша: ${n.name}`); haptic("success"); save(); }
+function moveOffice(id){ const o=OFFICES.find(x=>x.id===id);
+  if(S.money<o.move) return toast("Не хватает денег на переезд");
+  if(S.workers.length>o.desks) return toast("Команда не поместится");
+  S.money-=o.move; S.office=id; toast(`${o.ico} Переехали: ${o.name}!`); haptic("success"); save(); }
+function toggleTool(id){ S.tools[id]=!S.tools[id]; const t=TOOLS.find(x=>x.id===id); toast(S.tools[id]?`${t.ico} ${t.name} подключён`:`${t.name} отключён`); save(); }
+
+// ===================== СОБЫТИЯ =====================
+const EVENTS = [
+  {when:()=>true, ico:"🐈", t:"Кот прошёлся по клавиатуре", p:"…и задеплоил в прод. Сайт клиента теперь на латыни.",
+    a:["Откатить всё назад",()=>{ S.money-=3000; return "−3 000 ₽ на срочного админа. Кот под домашним арестом"; }],
+    b:["Сказать, что так задумано",()=>{ if(Math.random()<.5){ S.fans+=150; return "Клиенту понравилось! +150 фанатов. Кот получает премию"; } S.fans=Math.max(0,S.fans-100); return "Не прокатило. −100 фанатов"; }]},
+  {when:()=>S.money>30000, ico:"🧔", t:"Инвестор из Дубая", p:"Предлагает 100 000 ₽ за долю. Но заберёт 20% всех будущих продаж.",
+    a:["Беру деньги",()=>{ S.money+=100000; S.investor=true; return "+100 000 ₽. Теперь у тебя есть партнёр в белых кроссовках"; }],
+    b:["Сам справлюсь",()=>"Гордо. И немного страшно"]},
+  {when:()=>S.money>20000, ico:"🤳", t:"Блогер-миллионник хочет обзор", p:"За 18 000 ₽ снимет рилс про твой следующий продукт.",
+    a:["Договорились",()=>{ S.money-=18000; S.hype=1.6; return "−18 000 ₽. Следующий продукт будет продаваться на 60% лучше"; }],
+    b:["Дорого",()=>"Блогер ушёл снимать распаковку кроссовок"]},
+  {when:()=>S.job?.kind==="product", ico:"📅", t:"Пятница, 18:00", p:"Можно задеплоить промежуточную версию прямо сейчас.",
+    a:["Деплоим!",()=>{ if(Math.random()<.5){ S.job.D+=8; S.job.T+=8; return "Повезло! +8 к дизайну и коду"; } S.job.bugs+=6; return "Классика. +6 багов, выходные испорчены"; }],
+    b:["В понедельник",()=>{ S.job.bugs=Math.max(0,S.job.bugs-2); return "Мудро. −2 бага"; }]},
+  {when:()=>true, ico:"👵", t:"Тётя Галя просит сайт для кошки", p:"Бесплатно, конечно. Кошку зовут Принцесса.",
+    a:["Сделаю",()=>{ S.fans+=120; S.money-=1000; return "Принцесса стала звездой района. +120 фанатов, −1 000 ₽ на хостинг"; }],
+    b:["Вежливо отказать",()=>"Тётя Галя обиделась и поставит тебе 3 в следующем отзыве. Шутка. Наверное"]},
+  {when:()=>S.workers.length>1, ico:"🏝", t:"Сотрудник хочет на удалёнку", p:"Говорит, на Бали вдохновение сильнее.",
+    a:["Пусть летит",()=>{ const w=pick(S.workers.filter(x=>!x.me)); w.r+=1; return `${w.name} теперь присылает закаты. И идеи: +1 к науке`; }],
+    b:["Нет, работаем из офиса",()=>{ if(Math.random()<.35){ const w=pick(S.workers.filter(x=>!x.me&&!x.train)); if(w){ S.workers=S.workers.filter(x=>x!==w); return `${w.name} уволился и улетел без разрешения`; } } return "Сотрудник вздохнул и налил кофе"; }]},
+  {when:()=>true, ico:"🏆", t:"Хакатон на выходных", p:"Призовой фонд 30 000 ₽. Команда устанет и потеряет 3 дня.",
+    a:["Участвуем",()=>{ S.workers.forEach(w=>{ if(!w.train) w.train={stat:"r",until:S.day+3}; }); if(Math.random()<.45){ S.money+=30000; return "Победа! +30 000 ₽ и вся команда +1 к науке"; } return "Не победили, но все прокачали науку"; }],
+    b:["Отдыхаем",()=>"Выходные прошли под сериалы"]},
+  {when:()=>S.products.some(p=>p.weeksLeft>0), ico:"🦹", t:"Конкурент скопировал твой продукт", p:"Один в один, даже опечатки на месте.",
+    a:["Судиться",()=>{ S.money-=10000; if(Math.random()<.5){ S.money+=35000; return "Суд выигран! +25 000 ₽ чистыми"; } return "−10 000 ₽ на юриста. Суд затянулся"; }],
+    b:["Не обращать внимания",()=>{ S.products.forEach(p=>p.weekly*=.8); return "Продажи текущих продуктов упали на 20%"; }]},
+];
+function showEvent(){ const pool=EVENTS.filter(e=>e.when()&&e.t!==S.flags.lastEvent); if(!pool.length) return; const e=pick(pool); S.flags.lastEvent=e.t;
+  modal(`<div class="emo">${e.ico}</div><h2>${e.t}</h2><p class="c">${e.p}</p><button class="big-btn alt" id="ev-a">${e.a[0]}</button><button class="big-btn ghost" id="ev-b">${e.b[0]}</button>`);
+  const done=fn=>{ const res=fn(); closeModal(); toast(res); save(); };
+  $("ev-a").onclick=()=>done(e.a[1]); $("ev-b").onclick=()=>done(e.b[1]); event("event",{t:e.t}); }
+function seasonAward(){
+  const best=S.season.best; S.season={best:0,start:S.day};
+  if(best>=9){ S.money+=40000; S.fans=Math.round(S.fans*1.25); S.awards.push({day:S.day,win:true});
+    modal(`<div class="emo">🏆</div><h2>Премия «Золотой промт»!</h2><p class="c">Твой продукт признан лучшим за сезон. Ведущий перепутал название, но статуэтка твоя.</p><table class="table"><tr><td>Призовые</td><td>+40 000 ₽</td></tr><tr><td>Фанаты</td><td>+25%</td></tr></table><button class="big-btn" data-close>Спасибо маме</button>`); }
+  else if(best>=8){ S.fans=Math.round(S.fans*1.1); modal(`<div class="emo">🥈</div><h2>Номинация «Золотой промт»</h2><p class="c">До победы чуть-чуть не хватило. Нужна оценка от 9. Фанатов стало на 10% больше.</p><button class="big-btn" data-close>В следующий раз</button>`); }
+  else modal(`<div class="emo">🎭</div><h2>Премия «Золотой промт»</h2><p class="c">В этом сезоне победила «${pick(S.rivals).name}». Чтобы попасть в номинацию, нужна оценка от 8.</p><button class="big-btn" data-close>Ну и ладно</button>`);
+}
+
+// ===================== СТАРТ: ВЫБОР ОБУЧЕНИЯ =====================
+function askNames(){
+  const tgName=tg?.initDataUnsafe?.user?.first_name||"";
+  const ideas=["Вайб Студио","Нейро-Мастерская","Промт и Точка","Кодим с котом","Студия «Завтра сдадим»","Сырник Digital"];
+  modal(`<div class="emo">✍️</div><h2>Давай знакомиться</h2><p class="c">Как зовут тебя и твою будущую студию?</p>
+    <div class="step-lbl">Твоё имя</div><input class="inp" id="in-player" maxlength="16" placeholder="Например, Алекс" value="${(S.player||tgName).replace(/"/g,"")}">
+    <div class="step-lbl" style="margin-top:12px">Название студии</div><div class="row"><input class="inp grow" id="in-studio" maxlength="24" placeholder="Например, Вайб Студио" value="${(S.studio||pick(ideas)).replace(/"/g,"")}"><button class="mini-btn" id="in-dice">🎲</button></div>
+    <button class="big-btn" id="in-go" style="margin-top:16px">Дальше</button>`);
+  $("in-dice").onclick=()=>{ $("in-studio").value=pick(ideas); haptic("light"); };
+  $("in-go").onclick=()=>{ const pl=$("in-player").value.trim(), st=$("in-studio").value.trim();
+    if(!pl) return toast("Напиши своё имя"); if(!st) return toast("Придумай название студии");
+    S.player=pl; S.studio=st; S.workers[0].name=pl; save(); chooseTier(); };
+}
+function chooseTier(){
+  modal(`<div class="emo">🎒</div><h2>У тебя ${fmt(START_MONEY)} ₽ и мечта</h2>
+    <p class="c">Чтобы зарабатывать на нейросетях, сначала нужно научиться. От обучения зависит, с чем ты начнёшь</p>
+    ${Object.entries(TIERS).map(([k,t])=>`<div class="panel" style="${k==="earn"?"background:#e9f8c6":""}">
+      <div class="row"><div class="ic">${t.ico}</div><div class="grow"><h3>${t.name}${k==="earn"?' <span class="tag good">баланс</span>':""}</h3><div class="sm">останется ${fmt(START_MONEY-t.price)} ₽</div></div><div style="font-family:var(--dp);font-weight:800;white-space:nowrap">${t.price.toLocaleString("ru-RU")} ₽</div></div>
+      <div style="margin-top:8px">${t.pros.map(x=>`<div class="sm" style="color:#2f5a0d">✓ ${x}</div>`).join("")}${t.cons.map(x=>`<div class="sm" style="color:#b23b3b">✗ ${x}</div>`).join("")}</div>
+      <div class="row" style="margin-top:6px;gap:6px"><span class="pt d" style="font-size:12px">🎨 ${t.d}</span><span class="pt t" style="font-size:12px">💻 ${t.t}</span><span class="pt r" style="font-size:12px">🔬 ${t.r}</span></div>
+      <button class="big-btn ${k==="earn"?"":"ghost"}" style="margin-top:10px;padding:12px" data-tier="${k}">Учиться на «${t.name}»</button></div>`).join("")}
+    <p class="c" style="font-size:12px;margin:4px 0 0">Это настоящие тарифы курса «Бизнес на нейросетях». Купить в жизни можно по кнопке 🎓 сверху</p>`);
+  $("sheet").onclick=e=>{ const b=e.target.closest("[data-tier]"); if(!b) return; applyTier(b.dataset.tier); };
+}
+function applyTier(k){
+  const t=TIERS[k]; S.tier=k; S.money=START_MONEY-t.price; S.best=t.bar;
+  Object.assign(S.workers[0],{d:t.d,t:t.t,r:t.r});
+  S.can={design:t.design,flow:t.flow};
+  S.contracts=[]; if(t.flow){ genContracts(4); S.nextContracts=S.day+t.every; }
+  closeModal(); haptic("success"); event("tier_chosen",{tier:k}); save();
+  toast(`${t.ico} Обучение «${t.name}» пройдено!`);
+  if(!S.tutorial) startTut();
+}
+
+// ===================== КУРС =====================
+function openCourse(){
+  modal(`<div class="emo">🎓</div><h2>Вайб-кодинг в жизни</h2><p class="c">Всё, что ты делаешь в игре, можно делать по-настоящему: сайты, боты и приложения с помощью нейросетей. Этому учит курс «Бизнес на нейросетях»</p>
+    ${TARIFFS.map(t=>`<div class="panel" style="margin-bottom:10px;${t.hot?"background:#e9f8c6":""}"><div class="row"><div class="grow"><h3>${t.name}${t.hot?' <span class="tag good">популярный</span>':""}</h3><div class="sm">${t.desc}</div></div><div style="font-family:var(--dp);font-weight:800;white-space:nowrap">${t.price.toLocaleString("ru-RU")} ₽</div></div><button class="big-btn ${t.hot?"":"ghost"}" style="margin-top:10px;padding:11px" data-plan="${t.id}">Написать наставнику</button></div>`).join("")}
+    <button class="big-btn ghost" id="course-more">Подробнее о курсе ↗</button>`);
+  event("course_opened");
+  $("sheet").onclick=e=>{ const b=e.target.closest("[data-plan]"); if(b) return openPlan(b.dataset.plan);
+    if(e.target.id==="course-more"){ event("course_page_opened"); tg?.openLink?tg.openLink(COURSE_URL):window.open(COURSE_URL,"_blank"); } };
+}
+function openPlan(id){
+  const t=TARIFFS.find(x=>x.id===id), name=tg?.initDataUnsafe?.user?.first_name;
+  const text=`Здравствуйте!${name?" Меня зовут "+name+".":""} Хочу купить курс «Бизнес на нейросетях», тариф «${t.name}» (${t.price.toLocaleString("ru-RU")} ₽). Пришёл из игры «Вайб-кодер». Подскажите, как оплатить.`;
+  event("training_clicked",{tariff:t.id,price:t.price});
+  const url=`${CONTACT}?text=${encodeURIComponent(text)}`; tg?.openTelegramLink?tg.openTelegramLink(url):window.open(url,"_blank");
+}
+
+// ===================== ПИКСЕЛЬНАЯ СТУДИЯ =====================
+const cv=$("cv"), cx=cv.getContext("2d"); cx.imageSmoothingEnabled=false;
+const W=128,H=78;
+const PERSON=["..hhhhhh..",".hhhhhhhh.",".hssssssh.",".sesssses.",".ssssssss.","..ssmmss..","...ssss...","..cccccc..",".cccccccc.",".cccccccc."];
+const LID=["gggggggg","gggLLggg","ggLggLgg","gggLLggg","gggggggg"];
+const BOOK=["bbbbbbbb","bwwwwwwb","bwwwwwwb","bbbbbbbb"];
+const PLANT=["..g.g..",".ggggg.","ggGgggg",".gggGg.","..ggg..","...k...",".ooooo.",".ooooo.","..ooo.."];
+const COFFEE=["mmmmmm","mDDDDm","mDrrDm","mDDDDm","mmmmmm","m.cc.m","mmmmmm"];
+const CAT=[["o.....o.","oo...oo.","oooooooo","oeooeooo","oooooooo",".o.o.o.o"],["o.....o.","oo...oo.","oooooooo","oeooeooo","oooooooo","o.o.o.o."]];
+const SHELF=["wwwwwwwwww","wrbgyrbgyw","wwwwwwwwww","wbyrgbyrgw","wwwwwwwwww"];
+function sprite(map,x,y,pal,flip){ for(let r=0;r<map.length;r++) for(let c=0;c<map[r].length;c++){ const ch=map[r][c]; if(ch==="."||!pal[ch]) continue; cx.fillStyle=pal[ch]; cx.fillRect(x+(flip?map[r].length-1-c:c),y+r,1,1); } }
+function deskSlots(){ const n=office().desks; return n===1?[[55,50]]:n===3?[[12,48],[55,48],[98,48]]:[[12,40],[55,40],[98,40],[12,62],[55,62],[98,62]]; }
+const particles=[], bubbleQ=[];
+function bubble(wid,kind){ bubbleQ.push({wid,kind}); }
+let frame=0;
+const cat={x:20,dir:1,wait:0};
+function drawStudio(){
+  frame++;
+  const o=S.office, wall={flat:"#f4d9b0",garage:"#9fb7c9",office:"#cfe9d8"}[o], wall2={flat:"#ecc996",garage:"#8ca6b9",office:"#bfdcc9"}[o];
+  const floorA={flat:"#c48a5a",garage:"#7d7f87",office:"#e8e2d4"}[o], floorB={flat:"#b67b4d",garage:"#73757c",office:"#dcd5c4"}[o];
+  cx.fillStyle=wall; cx.fillRect(0,0,W,32); cx.fillStyle=wall2; for(let x=0;x<W;x+=8) cx.fillRect(x,0,1,32);
+  cx.fillStyle="#00000022"; cx.fillRect(0,30,W,2);
+  for(let y=32;y<H;y+=6) for(let x=0;x<W;x+=12){ cx.fillStyle=((x/12+y/6)%2)?floorA:floorB; cx.fillRect(x,y,12,6); }
+  // окно с облаками
+  cx.fillStyle="#5a3b25"; cx.fillRect(86,4,34,20); const sky=cx.createLinearGradient(0,6,0,22); sky.addColorStop(0,"#7fd3ff"); sky.addColorStop(1,"#c9f0ff"); cx.fillStyle=sky; cx.fillRect(88,6,30,16);
+  cx.fillStyle="#fff"; const cl=(frame*.04)%30; cx.fillRect(88+cl%30,9,7,2); cx.fillRect(90+cl%30,8,3,1); cx.fillRect(88+(cl+15)%30,16,5,2);
+  cx.fillStyle="#5a3b25"; cx.fillRect(102,6,2,16); cx.fillRect(88,13,30,1);
+  // постер «</>», часы, полка
+  cx.fillStyle="#1b1f3b"; cx.fillRect(8,4,16,19); cx.fillStyle="#B8E351"; cx.fillRect(9,5,14,17); cx.fillStyle="#1b1f3b";
+  cx.fillRect(11,10,2,1);cx.fillRect(10,11,1,1);cx.fillRect(11,12,2,1); cx.fillRect(15,9,1,5); cx.fillRect(18,10,2,1);cx.fillRect(20,11,1,1);cx.fillRect(18,12,2,1); cx.fillRect(11,17,10,1);
+  cx.fillStyle="#fff"; cx.fillRect(40,5,9,9); cx.fillStyle="#1b1f3b"; cx.fillRect(44,7,1,3); cx.fillRect(44,9,3,1);
+  sprite(SHELF,56,8,{w:"#8b5a2b",r:"#ff5d5d",b:"#3b6fd8",g:"#4caf50",y:"#ffd84d"});
+  // кофемашина, цветок, лампа
+  cx.fillStyle="#8b5a2b"; cx.fillRect(1,24,11,9); sprite(COFFEE,3,17,{m:"#55596b",D:"#2b2f3d",r:frame%40<20?"#ff5d5d":"#7a2b2b",c:"#fff"});
+  sprite(PLANT,119,22,{g:"#4caf50",G:"#2e7d32",k:"#2e7d32",o:"#c0703a"});
+  if(o!=="flat"){ cx.fillStyle="#b48cff"; cx.fillRect(72,16,9,15); cx.fillStyle="#1b1f3b"; for(let i=0;i<4;i++) cx.fillRect(74,18+i*3,5,1); cx.fillStyle=frame%30<15?"#5ee7ff":"#B8E351"; cx.fillRect(78,18,1,1); cx.fillRect(78,24,1,1); }
+  if(o==="flat"){ cx.fillStyle="#ff7eb6"; cx.fillRect(34,66,60,8); cx.fillStyle="#ff9fc9"; cx.fillRect(36,67,56,6); }
+  // столы и люди
+  const slots=deskSlots(), j=S.job;
+  slots.forEach(([dx,dy],i)=>{
+    const w=S.workers[i];
+    if(w){
+      const px=dx+4, py=dy-10, typing=j&&!w.train, bob=typing&&Math.floor(frame/8)%2?1:0;
+      sprite(PERSON,px,py+bob,{h:w.look.hair,s:w.look.skin,e:frame%90<4?w.look.skin:"#2b2b2b",m:"#e06b6b",c:w.look.shirt});
+      if(w.train) sprite(BOOK,px+1,py+6,{b:"#3b6fd8",w:"#fff"});
+      else { sprite(LID,px+1,py+6,{g:"#c9ccd6",L:typing&&frame%20<10?"#ffffff":"#B8E351"});
+        if(typing){ cx.fillStyle=w.look.skin; const f=Math.floor(frame/5)%2; cx.fillRect(px+(f?0:1),py+9,1,1); cx.fillRect(px+(f?9:8),py+9,1,1); }
+        else { cx.fillStyle="#fff"; cx.fillRect(px+10,py+6,3,3); cx.fillStyle="#8b5a2b"; cx.fillRect(px+10,py+6,3,1); } }
+      w._x=px+5; w._y=py;
+    }
+    cx.fillStyle="#e0a96d"; cx.fillRect(dx,dy,18,2); cx.fillStyle="#b5733f"; cx.fillRect(dx,dy+2,18,4); cx.fillRect(dx+1,dy+6,2,4); cx.fillRect(dx+15,dy+6,2,4);
+    if(!w){ cx.fillStyle="#00000033"; cx.fillRect(dx+6,dy-4,6,4); }
+  });
+  // кот гуляет по комнате
+  if(cat.wait>0) cat.wait--; else { cat.x+=cat.dir*.25; if(cat.x>112||cat.x<4){ cat.dir*=-1; cat.wait=80; } if(Math.random()<.003){ cat.wait=120; } }
+  sprite(CAT[cat.wait>0?0:Math.floor(frame/8)%2],Math.round(cat.x),H-8,{o:"#ff9f43",e:"#1b1f3b"},cat.dir<0);
+  // очки над головами
+  while(bubbleQ.length&&particles.length<40){ const b=bubbleQ.shift(), w=S.workers.find(x=>x.id===b.wid); if(!w||w._x==null) continue;
+    particles.push({x:w._x+rnd(-4,4),y:w._y-1,c:{d:"#ff7eb6",t:"#5ee7ff",b:"#ff5d5d"}[b.kind],life:40}); }
+  bubbleQ.length=0;
+  for(let i=particles.length-1;i>=0;i--){ const p=particles[i]; p.y-=.3; p.life--; if(p.life<=0){ particles.splice(i,1); continue; }
+    cx.globalAlpha=Math.min(1,p.life/15); cx.fillStyle="#1b1f3b"; cx.fillRect(Math.round(p.x)-1,Math.round(p.y)-1,4,4); cx.fillStyle=p.c; cx.fillRect(Math.round(p.x),Math.round(p.y),2,2); cx.globalAlpha=1; }
+}
+// реплики над головами
+function speak(){
+  if(document.hidden||!S.workers.length||!$("home").classList.contains("active")) return;
+  const w=pick(S.workers); if(w._x==null) return;
+  const line=w.train?"Учусь, не отвлекай":S.job?pick(SAY_WORK):pick(SAY_IDLE);
+  const st=$("studio"), sc=st.clientWidth/W;
+  const el=document.createElement("div"); el.className="say"; el.textContent=line; el.style.left=w._x*sc+"px"; el.style.top=(w._y-1)*sc+"px";
+  st.appendChild(el); setTimeout(()=>el.remove(),2600);
+}
+
+// ===================== ОТРИСОВКА =====================
+const cache={}; let pressing=false, lastMoney=null;
+addEventListener("pointerdown",()=>{ pressing=true; },true);
+["pointerup","pointercancel"].forEach(t=>addEventListener(t,()=>setTimeout(()=>{ pressing=false; },0),true));
+const setHTML=(id,h)=>{ if(pressing||cache[id]===h) return; $(id).innerHTML=h; cache[id]=h; };
+function render(){
+  drawStudio();
+  $("cash").textContent=fmt(S.money)+" ₽"; $("cash").classList.toggle("neg",S.money<0);
+  if(lastMoney!==null&&Math.abs(S.money-lastMoney)>=1){ const d=S.money-lastMoney, el=document.createElement("div"); el.className="delta "+(d>0?"plus":"minus"); el.textContent=(d>0?"+":"−")+fmt(Math.abs(d))+" ₽"; $("cashwrap").appendChild(el); setTimeout(()=>el.remove(),1400); }
+  lastMoney=S.money;
+  const r=myRank();
+  setHTML("chips",`${S.tier?`<span class="chip">${TIERS[S.tier].ico} ${TIERS[S.tier].name}</span>`:""}<span class="chip">📅 Месяц ${month()}, день ${dim()}</span><span class="chip">👥 ${fmt(S.fans)}</span><span class="chip">🔬 ${Math.floor(S.rp)}</span><span class="chip">🏆 ${r} место</span>${spd===0?'<span class="chip" style="background:var(--yel);color:var(--ink)">⏸ пауза</span>':""}`);
+  const c=monthlyCost(), left=MONTH-dim()+1;
+  $("bills-t").innerHTML=`Счета через ${left} дн.: <b>${fmt(c.total)} ₽</b>`;
+  $("bills-bar").style.width=dim()/MONTH*100+"%"; $("bills").classList.toggle("warn",S.money<c.total);
+  $("sign").textContent=`${office().ico} ${S.studio||office().name}`;
+  renderStatus(); renderProducts(); renderTeam(); renderLab();
+  $("dot-lab").style.display=RESEARCH.some(x=>!S.research[x.id]&&(!x.need||x.need())&&S.rp>=x.rp)||Object.entries(NICHES).some(([k,n])=>!S.niches[k]&&S.rp>=n.rp)?"block":"none";
+  $("dot-team").style.display=S.research.hire&&S.workers.length<office().desks&&S.cands.length?"block":"none";
+}
+function renderStatus(){
+  const j=S.job; let h="";
+  if(!j){
+    const wk=weeklyIncome();
+    h=`<div class="duo" id="actions">
+      <button class="big-btn" id="btn-new"><span class="e">🛠</span>Новый продукт<small>свой, с продажами</small></button>
+      <button class="big-btn alt" id="btn-contract"><span class="e">📋</span>Заказ<small>быстрые деньги</small></button></div>
+      ${wk?`<div class="panel" style="margin-top:14px;padding:12px 14px"><div class="row"><div class="grow"><div class="sm">Продажи приносят</div><b style="font-family:var(--dp)">${fmt(wk)} ₽ в неделю</b></div><span style="font-size:26px">📈</span></div></div>`:""}`;
+  } else if(j.kind==="product"){
+    const pct=Math.min(100,j.done/j.days*100), T=TYPES[j.type];
+    h=`<div class="panel" id="job"><div class="row"><div class="ic">${T.ico}</div><div class="grow"><h3>${j.name}</h3><div class="sm">${NICHES[j.niche].name} · фаза «${PHASES[j.phase].name}» ${PHASES[j.phase].opts[j.emph[j.phase]]?.ico||""}</div></div></div>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <div class="pts"><span class="pt d">🎨 ${Math.floor(j.D)}</span><span class="pt t">💻 ${Math.floor(j.T)}</span><span class="pt b">🐞 ${Math.floor(j.bugs)}</span><span class="pt n">${Math.max(0,Math.ceil(j.days-j.done))} дн. до релиза</span></div></div>`;
+  } else {
+    const left=j.deadline-S.day;
+    h=`<div class="panel" id="job"><div class="row"><div class="ic">📋</div><div class="grow"><h3>${j.what}</h3><div class="sm">${j.client} · ${fmt(j.pay)} ₽</div></div></div>
+      <div class="sm" style="margin-top:10px">🎨 Дизайн ${Math.floor(j.D)} из ${j.needD}</div><div class="bar" style="margin-top:4px"><i style="width:${Math.min(100,j.D/j.needD*100)}%;background:var(--pink)"></i></div>
+      <div class="sm" style="margin-top:8px">💻 Код ${Math.floor(j.T)} из ${j.needT}</div><div class="bar" style="margin-top:4px"><i style="width:${Math.min(100,j.T/j.needT*100)}%;background:var(--cyan)"></i></div>
+      <div class="pts"><span class="pt ${left<=1?"b":"n"}">${left<0?"срок вышел":left===0?"последний день":"осталось "+left+" дн."}</span><span class="pt n">штраф ${fmt(j.penalty)} ₽</span></div></div>`;
+  }
+  setHTML("status",h);
+}
+function renderProducts(){
+  setHTML("prod-list", S.products.length?S.products.slice(0,12).map(p=>`<div class="panel"><div class="row"><div class="ic">${TYPES[p.type].ico}</div><div class="grow"><h3>${p.name}</h3><div class="sm">${NICHES[p.niche].name} · ${SIZES[p.size].name.toLowerCase()}</div></div>
+    <div class="score" style="font-family:var(--dp);font-size:20px;font-weight:800;width:48px;height:48px;border:2px solid var(--ink);border-radius:12px;display:grid;place-items:center;background:${p.avg>=8?"var(--lime)":p.avg>=5?"var(--yel)":"var(--red)"}">${p.avg.toFixed(1).replace(".",",")}</div></div>
+    <div class="pts"><span class="pt n">заработал ${fmt(p.earned)} ₽</span>${p.weeksLeft>0?`<span class="pt n">📈 ${fmt(p.weekly)} ₽/нед, ещё ${p.weeksLeft} нед.</span>`:'<span class="pt n">продажи закончились</span>'}</div></div>`).join("")
+    :`<div class="panel" style="text-align:center"><div style="font-size:40px">📦</div><h3>Пока пусто</h3><div class="sm">Выпусти первый продукт на главной</div></div>`);
+  const list=[...S.rivals.map(r=>({n:r.name,v:r.rev})),{n:S.studio||"Твоя студия",v:S.earned,me:1}].sort((a,b)=>b.v-a.v);
+  setHTML("rating", list.map((x,i)=>`<div class="rank-row ${x.me?"me":""}"><span class="n">${i+1}</span><span class="grow">${x.me?"⭐ ":""}${x.n}</span><b>${fmt(x.v)} ₽</b></div>`).join("")+(S.awards.length?`<div class="sm" style="margin-top:8px">🏆 Золотых промтов: ${S.awards.filter(a=>a.win).length}</div>`:""));
+}
+function statBar(lbl,v,col){ return `<div class="row" style="gap:6px;margin-top:4px"><span class="sm" style="width:84px;white-space:nowrap">${lbl}</span><div class="bar grow" style="margin:0;height:10px"><i style="width:${Math.min(100,v*8)}%;background:${col}"></i></div><b style="width:18px;text-align:right">${v}</b></div>`; }
+function renderTeam(){
+  const of=office();
+  $("team-lead").textContent=`${of.ico} ${of.name}: ${S.workers.length} из ${of.desks} мест`;
+  setHTML("workers", S.workers.map(w=>`<div class="panel"><div class="row"><div class="ic" style="background:${w.look.shirt}">${w.me?"😎":"🧑‍💻"}</div><div class="grow"><h3>${w.name}</h3><div class="sm">${w.me?"основатель студии":`${fmt(w.salary)} ₽/мес`}${w.train?" · учится":""}</div></div>${w.me?"":`<button class="mini-btn off" data-fire="${w.id}">Уволить</button>`}</div>
+    ${statBar("🎨 Дизайн",w.d,"var(--pink)")}${statBar("💻 Код",w.t,"var(--cyan)")}${statBar("🔬 Наука",w.r,"var(--pur)")}
+    ${w.train?"":`<div class="row" style="margin-top:10px;gap:6px"><button class="mini-btn" style="flex:1;background:var(--pink)" data-train="${w.id}:d">+🎨 ${fmt(4000+w.d*1500)} ₽</button><button class="mini-btn" style="flex:1;background:var(--cyan)" data-train="${w.id}:t">+💻 ${fmt(4000+w.t*1500)} ₽</button></div>`}</div>`).join(""));
+  setHTML("cands", !S.research.hire?`<div class="panel" style="text-align:center"><div style="font-size:34px">🔒</div><h3>Найм закрыт</h3><div class="sm">Исследуй «Первый сотрудник» в «Науке»</div></div>`
+    :`<div class="title" style="font-size:16px">Кандидаты</div>`+S.cands.map(c=>`<div class="panel"><div class="row"><div class="ic" style="background:${c.look.shirt}">🧑‍💻</div><div class="grow"><h3>${c.name}</h3><div class="sm">${{d:"дизайнер",t:"разработчик",r:"исследователь",u:"универсал"}[c.role]} · ${fmt(c.salary)} ₽/мес</div></div><button class="mini-btn" data-hire="${c.id}">Нанять</button></div>${statBar("🎨 Дизайн",c.d,"var(--pink)")}${statBar("💻 Код",c.t,"var(--cyan)")}${statBar("🔬 Наука",c.r,"var(--pur)")}</div>`).join("")+`<p class="lead">Новые кандидаты появятся после следующего релиза</p>`);
+  setHTML("offices", OFFICES.map(o=>`<div class="panel"><div class="row"><div class="ic">${o.ico}</div><div class="grow"><h3>${o.name}</h3><div class="sm">${o.desks} ${o.desks===1?"место":o.desks<5?"места":"мест"} · ${o.rent?fmt(o.rent)+" ₽/мес":"без аренды"}${o.move?" · переезд "+fmt(o.move)+" ₽":""}</div></div>${S.office===o.id?'<span class="mini-btn done">Ты здесь</span>':`<button class="mini-btn ${S.money<o.move?"off":""}" data-office="${o.id}">Переехать</button>`}</div></div>`).join(""));
+  setHTML("tools", TOOLS.map(t=>`<div class="panel"><div class="row"><div class="ic">${t.ico}</div><div class="grow"><h3>${t.name}</h3><div class="sm">${t.desc} · ${fmt(t.cost*S.workers.length)} ₽/мес</div></div><button class="mini-btn ${S.tools[t.id]?"done":""}" data-tool="${t.id}">${S.tools[t.id]?"Вкл ✓":"Подключить"}</button></div></div>`).join(""));
+}
+function renderLab(){
+  const rbtn=(have,cost,attr)=>have?'<span class="mini-btn done">Есть ✓</span>':`<button class="mini-btn ${S.rp>=cost?"":"off"}" ${attr}>${cost} 🔬</button>`;
+  setHTML("research", `<div class="panel" style="text-align:center;padding:12px"><div class="sm">У тебя</div><div style="font-family:var(--dp);font-size:28px;font-weight:800;color:#6b43c9">${Math.floor(S.rp)} 🔬</div></div>`
+    +RESEARCH.filter(x=>!x.need||x.need()||S.research[x.id]).map(x=>`<div class="panel" id="res-${x.id}"><div class="row"><div class="ic">${x.ico}</div><div class="grow"><h3>${x.name}</h3><div class="sm">${x.desc}</div></div>${rbtn(S.research[x.id],x.rp,`data-res="${x.id}"`)}</div></div>`).join("")
+    +`<div class="title" style="font-size:16px">Новые ниши</div>`+Object.entries(NICHES).filter(([k])=>!S.niches[k]).map(([k,n])=>`<div class="panel"><div class="row"><div class="ic">${n.ico}</div><div class="grow"><h3>${n.name}</h3><div class="sm">Новые клиенты для твоих продуктов</div></div>${rbtn(false,n.rp,`data-niche-open="${k}"`)}</div></div>`).join(""));
+}
+
+// ===================== ОКНА =====================
+function modal(h){ $("sheet").innerHTML=h; $("sheet").onclick=null; $("sheet").scrollTop=0; $("modal").classList.add("show"); }
+function closeModal(){ $("modal").classList.remove("show"); }
+$("modal").addEventListener("click",e=>{ if(e.target.closest("[data-close]")) return closeModal(); if(e.target.id==="soft-course"){ e.preventDefault(); closeModal(); openCourse(); } if(e.target.id==="modal"&&!S.over&&!waitingPhase&&!tActive&&S.tier) closeModal(); });
+let toastT; function toast(t){ if(!t) return; const el=$("toast"); el.textContent=t; el.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove("show"),2800); }
+function coins(){ for(let i=0;i<10;i++) setTimeout(()=>{ const c=document.createElement("div"); c.textContent=pick(["💸","🪙","💰"]); c.style.cssText=`position:fixed;z-index:140;pointer-events:none;font-size:26px;left:${innerWidth/2+rnd(-120,120)}px;top:${innerHeight*.45+rnd(-50,50)}px;transition:transform 1s ease-out,opacity 1s`; document.body.appendChild(c); requestAnimationFrame(()=>{ c.style.transform=`translateY(-150px) rotate(${rnd(-40,40)}deg)`; c.style.opacity="0"; }); setTimeout(()=>c.remove(),1100); },i*50); }
+function haptic(t){ const h=tg?.HapticFeedback; if(!h) return; try{ t==="light"?h.impactOccurred("light"):h.notificationOccurred(t); }catch{} }
+
+// ===================== ОБУЧЕНИЕ =====================
+const TUT=[
+  {t:"studio",h:"Это твоя студия 🛋",p:"Пока это квартира, ноутбук и ты. Цель: вырасти до большой студии и стать первым в рейтинге."},
+  {t:"cash",h:"Деньги и счета",p:"Каждый месяц приходят счета за жизнь и подписки. Два месяца подряд в минусе, и студия закроется."},
+  {t:"btn-new",h:"Сделаем первый продукт",p:"Свой продукт приносит деньги неделями. Жми «Новый продукт».",w:"np_open"},
+  {t:null,inSheet:true,h:"",p:"",w:"phase_chosen"},
+  {t:"job",h:"Команда за работой",p:"Смотри на студию: розовые точки это дизайн, голубые код, красные баги. Дождись релиза.",w:"released",run:true},
+  {t:"btn-contract",h:"Заказы",p:"Когда денег мало, бери заказы: быстрые деньги, но штраф за срыв срока. На «Старте» заказы ищешь сам, на старших тарифах они приходят сами."},
+  {t:"nav-lab",h:"Наука",p:"Во время работы копятся очки науки 🔬. На них открываются новые ниши, типы продуктов и найм.",w:"tab_lab"},
+  {t:"res-hire",h:"Первое исследование",p:"Когда хватит очков, открой «Первый сотрудник». Вдвоём работать веселее."},
+  {t:"nav-home",h:"Удачи!",p:"Угадывай сочетания ниш и типов, следи за багами и деньгами. Оценки сравнивают с твоим лучшим продуктом, так что расти постоянно.",w:"tab_home",last:true},
+];
+let tActive=false,tStep=-1,tRaf;
+function startTut(){ tActive=true; tStep=-1; $("coach").classList.add("show"); nextTut(); }
+function nextTut(){ tStep++; const s=TUT[tStep]; if(!s) return endTut();
+  $("coach").style.visibility=s.inSheet?"hidden":"visible";
+  const btn=s.w?`<span class="wt">${s.w==="released"?"Ждём релиза…":"Нажми на подсвеченное"}</span>`:`<button class="nx" id="tn">${tStep===0?"Поехали":"Понятно"}</button>`;
+  $("tip").innerHTML=`<div class="st">Обучение · ${tStep+1}/${TUT.length}</div><h4>${s.h}</h4><p>${s.p}</p><div class="r">${btn}${s.last?"":'<button class="sk" id="tsk">Пропустить</button>'}</div>`;
+  $("tn")?.addEventListener("click",nextTut); $("tsk")?.addEventListener("click",endTut);
+  $("spot").classList.toggle("pulse",!!s.w);
+  if(s.t==="nav-lab"||s.t==="nav-home"||s.t==="studio"||s.t==="job"||s.t==="btn-new"||s.t==="btn-contract") switchTab("home",true);
+  if(s.t==="res-hire") switchTab("lab",true);
+  setTimeout(()=>tEl(s.t)?.scrollIntoView({block:"center"}),50);
+  cancelAnimationFrame(tRaf); placeTut(); }
+function tEl(t){ if(!t) return null; if(t.startsWith("nav-")) return document.querySelector(`.nav [data-tab="${t.slice(4)}"]`); return $(t); }
+function placeTut(){ const s=TUT[tStep]; if(!s) return;
+  $("coach").style.zIndex=modalOpen()?"90":"110";
+  const el=tEl(s.t), sp=$("spot"), tip=$("tip"), r=el?.getBoundingClientRect();
+  if(!r||!r.width){ Object.assign(sp.style,{left:"50%",top:"40%",width:"0",height:"0"}); tip.style.top=Math.max(60,innerHeight/2-tip.offsetHeight/2)+"px"; }
+  else{ const pad=6; Object.assign(sp.style,{left:r.left-pad+"px",top:r.top-pad+"px",width:r.width+pad*2+"px",height:r.height+pad*2+"px",borderRadius:s.t.startsWith("nav-")?"16px":"22px"});
+    const below=r.bottom+pad+12, above=r.top-pad-12-tip.offsetHeight; tip.style.top=(below+tip.offsetHeight<innerHeight-8?below:above>8?above:8)+"px"; }
+  tRaf=requestAnimationFrame(placeTut); }
+function coachEvent(n){ if(tActive&&TUT[tStep]?.w===n) setTimeout(nextTut,n==="released"?200:150); }
+function endTut(){ cancelAnimationFrame(tRaf); tActive=false; tStep=-1; $("coach").classList.remove("show"); $("coach").style.visibility="visible"; if(!S.tutorial){ S.tutorial=true; event("onboarding_completed"); save(); } }
+
+// ===================== СВЯЗЬ С БОТОМ =====================
+function event(name,params={}){ if(!tg?.initData) return; fetch(`${API_URL}/api/game-event`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({initData:tg.initData,event:name,params}),keepalive:true}).catch(()=>{}); }
+let lastSync="";
+function sync(){ if(!tg?.initData) return;
+  const body=JSON.stringify({tg_data:tg.initData,capital:Math.floor(S.money),reputation:S.products[0]?Math.round(S.products[0].avg*5)/10:0,level:S.stats.released,inventory_count:S.workers.length});
+  if(body===lastSync) return; lastSync=body; fetch(`${API_URL}/api/sync`,{method:"POST",headers:{"Content-Type":"application/json"},body,keepalive:true}).catch(()=>{}); }
+async function loadProfile(){ if(!tg?.initData) return;
+  try{ const r=await(await fetch(`${API_URL}/api/load_profile?tg_data=${encodeURIComponent(tg.initData)}`)).json();
+    if(r.is_banned){ $("blocked").style.display="grid"; return; }
+    // на новом устройстве деньги с сервера не берём (там капитал из прошлой игры), иначе разница — бонус от админа
+    if(!WAS_FRESH&&r.server_capital>S.money+1){ const b=r.server_capital-S.money; S.money=r.server_capital; toast(`🎁 Бонус от администратора: +${fmt(b)} ₽`); }
+  }catch{} sync(); }
+
+// ===================== ЗАПУСК =====================
+function switchTab(tab,silent){
+  document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));
+  document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===tab));
+  $(tab).scrollTop=0; if(!silent){ haptic("light"); coachEvent("tab_"+tab); }
+}
+document.querySelectorAll(".nav button").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.tab)));
+document.querySelectorAll("#speed button").forEach(b=>b.addEventListener("click",()=>{ spd=+b.dataset.sp; document.querySelectorAll("#speed button").forEach(x=>x.classList.toggle("on",x===b)); haptic("light"); }));
+document.body.addEventListener("click",e=>{
+  if(e.target.closest("#sheet")) return;
+  const g=k=>e.target.closest(`[data-${k}]`); let b;
+  if(e.target.closest("#btn-new")) return openNewProduct();
+  if(e.target.closest("#btn-contract")) return openContracts();
+  if(b=g("hire")) return hire(+b.dataset.hire);
+  if(b=g("fire")) return fire(+b.dataset.fire);
+  if(b=g("train")){ const [id,st]=b.dataset.train.split(":"); return trainW(+id,st); }
+  if(b=g("office")) return moveOffice(b.dataset.office);
+  if(b=g("tool")) return toggleTool(b.dataset.tool);
+  if(b=g("res")) return doResearch(b.dataset.res);
+  if(b=g("niche-open")) return openNiche(b.dataset.nicheOpen);
+});
+$("course-btn").onclick=openCourse;
+$("settings-btn").onclick=openSettings;
+function openSettings(){
+  modal(`<div class="emo">⚙️</div><h2>Настройки</h2>
+    <div class="step-lbl">Твоё имя</div><input class="inp" id="st-player" maxlength="16" value="${(S.player||"").replace(/"/g,"")}">
+    <div class="step-lbl" style="margin-top:12px">Название студии</div><input class="inp" id="st-studio" maxlength="24" value="${(S.studio||"").replace(/"/g,"")}">
+    <button class="big-btn" id="st-save" style="margin-top:14px">Сохранить</button>
+    <button class="big-btn ghost" id="st-tut">📖 Пройти обучение заново</button>
+    <button class="big-btn pink" id="st-reset">🔄 Начать игру заново</button>
+    <p class="c" style="font-size:12px;margin:12px 0 0">Тариф: ${S.tier?TIERS[S.tier].ico+" "+TIERS[S.tier].name:"не выбран"} · день ${S.day}</p>`);
+  $("st-save").onclick=()=>{ const pl=$("st-player").value.trim(), st=$("st-studio").value.trim(); if(pl){ S.player=pl; S.workers[0].name=pl; } if(st) S.studio=st; save(); closeModal(); toast("Сохранено"); };
+  $("st-tut").onclick=()=>{ closeModal(); switchTab("home",true); startTut(); };
+  $("st-reset").onclick=()=>{ modal(`<div class="emo">🔄</div><h2>Начать заново?</h2><p class="c">Весь прогресс пропадёт: деньги, команда, продукты. Снова выберешь имя и обучение.</p><button class="big-btn pink" id="rs-yes">Да, заново</button><button class="big-btn ghost" data-close>Отмена</button>`);
+    $("rs-yes").onclick=()=>{ resetting=true; localStorage.removeItem(KEY); location.reload(); }; };
+}
+if(tg){ tg.ready(); tg.expand(); try{ tg.setHeaderColor("#1b1f3b"); tg.setBackgroundColor("#1b1f3b"); tg.disableVerticalSwipes?.(); }catch{} }
+
+render();
+setInterval(tick,50);
+setInterval(speak,3800);
+setInterval(save,4000);
+setInterval(sync,20000);
+document.addEventListener("visibilitychange",()=>{ if(document.hidden){ save(); sync(); } else lastT=performance.now(); });
+if(S.over) bankrupt(); else if(!S.tier) (S.studio?chooseTier():askNames()); else if(S.job?.kind==="product"&&S.job.emph[S.job.phase]===null) askPhase(); else if(!S.tutorial) startTut();
+loadProfile(); save();
+</script>
+</body>
 </html>
